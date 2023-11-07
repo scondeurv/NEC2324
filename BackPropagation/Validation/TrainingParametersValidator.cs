@@ -18,7 +18,7 @@ public class TrainingParametersValidator : AbstractValidator<TrainingParameters>
             .NotEmpty();
 
         RuleFor(tp => tp.ActivationFunction)
-            .Must(s => Enum.TryParse(typeof(ActivationFunctionType), (string?)s, true, out var result));
+            .Must(s => Enum.TryParse(typeof(ActivationFunction), (string?)s, true, out var result));
         
         RuleFor(tp => tp.Layers)
             .GreaterThan(0);

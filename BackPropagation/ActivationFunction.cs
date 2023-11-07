@@ -1,8 +1,9 @@
 ﻿namespace BackPropagation;
 
-public enum ActivationFunctionType
+public enum ActivationFunction
 {
     ReLu,
     Sigmoid,
     Tanh,
+    Linear,
 }
