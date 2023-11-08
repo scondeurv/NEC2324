@@ -2,6 +2,6 @@
 
 public record ScalingMethodConfiguration
 {
-    public string ScalingMethod { get; init; }
-    public IReadOnlyDictionary<string, string>? Parameters { get; init; }
+    public required string ScalingMethod { get; init; }
+    public (double, double)? Range { get; init; }
 }
