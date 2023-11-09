@@ -2,5 +2,5 @@
 
 public interface IScalingMethod
 {
-    Task<double[]> Scale(double[] data);
+    Task<double[]> Scale(double[] data, CancellationToken? cancellationToken = null);
 }
