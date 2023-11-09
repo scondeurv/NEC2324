@@ -11,7 +11,6 @@ public sealed class NeuralNetwork
     private ILogger Logger { get; }
     private ISet<string> Features { get; }
     private double[][] Data { get; }
-    private string OutputFeature { get; }
     private int L { get; } //Number of layers
     private int[] N { get; } //Units per layer
     private double[][] H { get; } // Fields
@@ -25,29 +24,27 @@ public sealed class NeuralNetwork
     private double[][] D_Theta_Prev { get; } //Threshold previous changes
     private IActivationFunction Fact { get; }
 
-    public NeuralNetwork(ILogger logger, ISet<string> features, double[][] data, string outputFeature,
-        int[] unitsPerLayer,
-        ActivationFunctionType fact)
+    public NeuralNetwork(ILogger logger, ISet<string> features, double[][] data, int[] unitsPerLayer, ActivationFunctionType fact)
     {
         Features = features;
         Logger = logger;
         L = unitsPerLayer.Length;
         N = unitsPerLayer;
 
-        H = new double[L][];
-        Xi = new double[L+1][];
+        H = new double[L-1][];
+        Xi = new double[L][];
         Xi[0] = new double[Data[0].Length];
-        W = new double[L][,];
-        Theta = new double[L][];
-        Delta = new double[L][];
-        D_W = new double[L][,];
-        D_Theta = new double[L][];
-        D_W_Prev = new double[L][,];
-        D_Theta_Prev = new double[L][];
-        for (var layer = 0; layer < L; layer++)
+        W = new double[L-1][,];
+        Theta = new double[L-1][];
+        Delta = new double[L-1][];
+        D_W = new double[L-1][,];
+        D_Theta = new double[L-1][];
+        D_W_Prev = new double[L-1][,];
+        D_Theta_Prev = new double[L-1][];
+        for (var layer = 0; layer < L - 1; layer++)
         {
             H[layer] = new double[N[layer]];
-            Xi[layer+1] = new double[N[layer]];
+            Xi[layer+1] = new double[N[layer+1]];
             W[layer] = new double[data.Length, N[layer]];
             Theta[layer] = new double[N[layer]];
             Delta[layer] = new double[N[layer]];
@@ -56,10 +53,9 @@ public sealed class NeuralNetwork
             D_W_Prev[layer] = new double[data.Length, N[layer]];
             D_Theta_Prev[layer] = new double[N[layer]];
         }
-
-        OutputFeature = outputFeature;
+        
         Data = data;
-
+        
         var factory = new ActivationFunctionFactory();
         Fact = factory.Create(fact);
     }
@@ -88,10 +84,13 @@ public sealed class NeuralNetwork
         
         for (var epoch = 1; epoch <= numberOfEpochs; epoch++)
         {
+            cancellationToken?.ThrowIfCancellationRequested();
+            
             Logger.LogInformation($"Running Epoch {epoch}...");
 
             for (var pattern = 0; pattern < datasets.TrainingSet[0].Length; pattern++)
             {
+                Logger.LogInformation($"Feed forward {epoch}.{pattern}...");
                 await InitXi(datasets.TrainingSet, pattern, cancellationToken);   
                 for (var layer = 0; layer < L; layer++)
                 {
@@ -110,35 +109,53 @@ public sealed class NeuralNetwork
                         Xi[layer + 1][unit] = Fact.Eval(h);
                     }
                 }
+                Logger.LogInformation($"Feed forward {epoch}.{pattern} ended");
+                Logger.LogInformation($"Back propagation {epoch}.{pattern}...");
+                var ox = Xi[Xi.Length][0];
+                var z = datasets.TrainingSet[^1][pattern];
+                for (var unit = 0; unit < Delta[L - 1].Length; unit++)
+                {
+                    Delta[L - 1][unit] = Fact.Derivative(H[L - 1][unit]) * (ox - z);
+                }
+                
+                for (var layer = L - 2; layer >= 0; layer--)
+                {
+                    for (var unit = 0; unit < Delta[layer].Length; unit++)
+                    {
+                        var sum = 0.0;
+                        for (var i = 0; i < Delta[layer + 1].Length; i++)
+                        {
+                            sum += Delta[layer + 1][i] * W[layer + 1][unit, i];
+                        }
 
-                var prediction = Xi[Xi.Length][0];
+                        var gPrime = Fact.Derivative(H[layer + 1][unit]);
+                        Delta[layer][unit] = gPrime * sum;
+                    }
+                }
+                Logger.LogInformation($"Back propagation {epoch}.{pattern} ended");
             }
         }
     }
 
     private Task InitXi(double[][] data, int pattern, CancellationToken? cancellationToken)
     {
-        for (var row = 0; row < data.Length; row++)
+        for (var i = 0; i < Xi[0].Length; i++)
         {
             cancellationToken?.ThrowIfCancellationRequested();
-            Xi[0][row] = data[row][pattern];
+            Xi[0][i] = data[i][pattern];
         }
         return Task.CompletedTask;
     }
     
     private async Task<(double[][] TrainingSet, double[][] TestSet)> SplitDataSet(double trainingSetPercentage, CancellationToken? cancellationToken)
     {
-        // Shuffle the dataset
         var shuffledData = await Shuffle(Data, cancellationToken);
-
-        // Calculate the number of rows in the training set
         var trainingSize = (int)(shuffledData.Length * trainingSetPercentage / 100);
         var testSize = shuffledData.Length - trainingSize;
 
         var trainingSet = new double[trainingSize][];
         var testSet = new double[testSize][];
-
-        // Split the dataset
+        
         Array.Copy(shuffledData, 0, trainingSet, 0, trainingSize);
         Array.Copy(shuffledData, trainingSize, testSet, 0, testSize);
 
