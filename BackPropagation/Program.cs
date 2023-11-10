@@ -1,4 +1,6 @@
-﻿using BackPropagation.Configuration;
+﻿using BackPropagation;
+using BackPropagation.Configuration;
+using BackPropagation.Scaling;
 using BackPropagation.Validation;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -27,6 +29,25 @@ var trainingParameters = JsonConvert.DeserializeObject<TrainingParameters>(json)
 if (!ValidateTrainingParameters(trainingParameters, logger))
 {
     return;
+}
+
+var dataFile = new DataFile();
+await dataFile.Load(trainingParameters.DataFile);
+
+var cancellationTokenSource = new CancellationTokenSource();
+try
+{
+    var nn = new NeuralNetwork(logger, dataFile.Features, dataFile.Data, trainingParameters.UnitsPerLayer,
+        trainingParameters.ActivationFunction);
+    var factory = new ScalingMethodFactory();
+    var scalingPerFeature = factory.CreatePerFeature(trainingParameters.ScalingConfiguration);
+    await nn.Train(trainingParameters.Epochs, trainingParameters.TrainingDataPercentage,
+        trainingParameters.LearningRate, trainingParameters.Momentum, scalingPerFeature);
+}
+catch
+{
+    cancellationTokenSource.Cancel();
+    throw;
 }
 
 static bool ValidateTrainingParameters(TrainingParameters trainingParameters, ILogger logger)

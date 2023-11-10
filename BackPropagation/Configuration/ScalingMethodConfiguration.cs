@@ -2,6 +2,6 @@
 
 public record ScalingMethodConfiguration
 {
-    public required string ScalingMethod { get; init; }
+    public required string Method { get; init; }
     public (double, double)? Range { get; init; }
 }

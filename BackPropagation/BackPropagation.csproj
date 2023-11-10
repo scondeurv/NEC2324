@@ -15,4 +15,13 @@
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="A1-turbine.txt">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="A1-turbine.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>
