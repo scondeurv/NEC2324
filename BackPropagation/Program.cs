@@ -24,25 +24,24 @@ if (string.IsNullOrWhiteSpace(parametersFile))
 }
 
 var json = await File.ReadAllTextAsync(parametersFile);
-var trainingParameters = JsonConvert.DeserializeObject<TrainingParameters>(json);
+var parameters = JsonConvert.DeserializeObject<NeuralNetworkParameters>(json);
 
-if (!ValidateTrainingParameters(trainingParameters, logger))
+if (!ValidateNeuralNetworkParameters(parameters, logger))
 {
     return;
 }
 
 var dataFile = new DataFile();
-await dataFile.Load(trainingParameters.DataFile);
+await dataFile.Load(parameters.DataFile);
 
 var cancellationTokenSource = new CancellationTokenSource();
 try
 {
-    var nn = new NeuralNetwork(logger, dataFile.Features, dataFile.Data, trainingParameters.UnitsPerLayer,
-        trainingParameters.ActivationFunction);
+    var nn = new MyNeuralNetwork(logger, dataFile.Features, dataFile.Data, parameters.UnitsPerLayer,
+        parameters.ActivationFunction, parameters.Epochs, parameters.ValidationPercentage);
     var factory = new ScalingMethodFactory();
-    var scalingPerFeature = factory.CreatePerFeature(trainingParameters.ScalingConfiguration);
-    await nn.Train(trainingParameters.Epochs, trainingParameters.TrainingDataPercentage, trainingParameters.TestDataPercentage,
-        trainingParameters.LearningRate, trainingParameters.Momentum, scalingPerFeature);
+    var scalingPerFeature = factory.CreatePerFeature(parameters.ScalingConfiguration);
+    await nn.Fit(parameters.LearningRate, parameters.Momentum, scalingPerFeature);
 }
 catch
 {
@@ -50,9 +49,9 @@ catch
     throw;
 }
 
-static bool ValidateTrainingParameters(TrainingParameters trainingParameters, ILogger logger)
+static bool ValidateNeuralNetworkParameters(NeuralNetworkParameters trainingParameters, ILogger logger)
 {
-    var validator = new TrainingParametersValidator();
+    var validator = new NeuralNetworksParameterValidator();
     var result = validator.Validate(trainingParameters);
 
     if (!result.IsValid)

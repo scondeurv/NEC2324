@@ -2,11 +2,12 @@
 
 public sealed class MinMax : IScalingMethod
 {
-    private (double Min, double Max) Range { get; }
+    private (double Min, double Max)? OriginalRange { get; set; }
+    private (double Min, double Max) ScaledRange { get; }
 
     public MinMax(double rangeMin, double rangeMax)
     {
-        Range = rangeMin < rangeMax
+        ScaledRange = rangeMin < rangeMax
             ? (rangeMin, rangeMax)
             : throw new ArgumentException(nameof(rangeMax));
     }
@@ -19,18 +20,41 @@ public sealed class MinMax : IScalingMethod
         }
 
         var minMax = await Task.WhenAll(GetMin(data, cancellationToken), GetMax(data, cancellationToken));
-        var min = minMax[0];
-        var max = minMax[1];
+        OriginalRange = (minMax[0], minMax[1]);
         var scaledData = new double[data.Length];
-        var deltaRange = Range.Max - Range.Min;
-        var deltaMinMax = max - min;
+        var deltaScaledRange = ScaledRange.Max - ScaledRange.Min;
+        var deltaMinMax = OriginalRange.Value.Max - OriginalRange.Value.Min;
         for (var i = 0; i < data.Length; i++)
         {
             cancellationToken?.ThrowIfCancellationRequested();
-            scaledData[i] = Range.Min + deltaRange/deltaMinMax * (data[i] - min);
+            scaledData[i] = ScaledRange.Min + deltaScaledRange/deltaMinMax * (data[i] - OriginalRange.Value.Min);
         }
 
         return scaledData;
+    }
+    
+    public Task<double[]> Descale(double[] scaledData, CancellationToken? cancellationToken = null)
+    {
+        if (OriginalRange is null)
+        {
+            throw new NotSupportedException("Scale must be run first!");
+        }
+        
+        if (scaledData is null || scaledData.Length == 0)
+        {
+            throw new ArgumentNullException(nameof(scaledData));
+        }
+        
+        var descaledData = new double[scaledData.Length];
+        var deltaScaledRange = ScaledRange.Max - ScaledRange.Min;
+        var deltaMinMax = OriginalRange.Value.Max - OriginalRange.Value.Min;
+        for (var i = 0; i < scaledData.Length; i++)
+        {
+            cancellationToken?.ThrowIfCancellationRequested();
+            descaledData[i] = OriginalRange.Value.Min + deltaMinMax/deltaScaledRange * (scaledData[i] - ScaledRange.Min);
+        }
+
+        return Task.FromResult(descaledData);
     }
 
     private static Task<double> GetMin(double[] data, CancellationToken? cancellationToken)

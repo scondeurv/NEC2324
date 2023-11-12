@@ -1,12 +1,11 @@
 ﻿{
    "dataFile": "A1-turbine.txt",
-   "trainingDataPercentage": 60,
-   "testDataPercentage": 20,
-   "layers": 8,
-   "unitsPerLayer":  [4, 9, 9, 9, 7, 5, 3, 1],
-   "epochs": 10000,
+   "validationPercentage": 0.2,
+   "layers": 6,
+   "unitsPerLayer":  [4, 13, 9, 7, 3, 1],
+   "epochs": 100000,
    "learningRate": 0.0001,
-   "momentum": 0.75,
+   "momentum": 0.8,
    "scalingConfiguration" : {
       "#height_over_sea_level" : {
          "method" : "minmax",

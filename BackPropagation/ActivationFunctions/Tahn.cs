@@ -7,6 +7,6 @@ public sealed class Tahn : IActivationFunction
     public double Derivative(double input)
     {
         var tanh = Eval(input);
-        return 1 - tanh * tanh;
+        return 1 - Math.Pow(tanh, 2);
     }
 }
