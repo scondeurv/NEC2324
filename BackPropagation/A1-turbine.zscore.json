@@ -3,9 +3,9 @@
    "validationPercentage": 0.2,
    "layers": 5,
    "unitsPerLayer":  [4, 9, 5, 3, 1],
-   "epochs": 10000,
-   "learningRate": 0.001,
-   "momentum": 0.8,
+   "epochs": 1500,
+   "learningRate": 0.01,
+   "momentum": 0.5,
    "scalingConfiguration" : {
       "#height_over_sea_level" : {
          "method" : "zscore"
@@ -23,5 +23,5 @@
          "method" : "zscore"
       }
    },
-   "activationFunction": "tanh"
+   "activationFunction": "sigmoid"
 }

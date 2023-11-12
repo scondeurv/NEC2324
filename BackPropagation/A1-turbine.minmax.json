@@ -3,9 +3,9 @@
    "validationPercentage": 0.2,
    "layers": 5,
    "unitsPerLayer":  [4, 9, 5, 3, 1],
-   "epochs": 1500,
-   "learningRate": 0.1,
-   "momentum": 0.9,
+   "epochs": 300,
+   "learningRate": 0.01,
+   "momentum": 0.6,
    "scalingConfiguration" : {
       "#height_over_sea_level" : {
          "method" : "minmax",

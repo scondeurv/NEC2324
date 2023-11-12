@@ -41,7 +41,7 @@ try
         parameters.ActivationFunction, parameters.Epochs, parameters.ValidationPercentage);
     var factory = new ScalingMethodFactory();
     var scalingPerFeature = factory.CreatePerFeature(parameters.ScalingConfiguration);
-    await nn.Fit(parameters.LearningRate, parameters.Momentum, scalingPerFeature);
+    await nn.Fit(parameters.LearningRate, parameters.Momentum, scalingPerFeature, cancellationTokenSource.Token);
 }
 catch
 {
