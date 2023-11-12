@@ -51,23 +51,17 @@ public sealed class MyNeuralNetwork
         for (var layer = 0; layer < L; layer++)
         {
             Xi[layer] = new double[N[layer]];
-
+            Delta[layer] = new double[N[layer]]; 
+            H[layer] = new double[N[layer]]; 
+            Theta[layer] = new double[N[layer]];
+            D_Theta[layer] = new double[N[layer]];
+            D_Theta_Prev[layer] = new double[N[layer]];
+            
             if (layer > 0)
             {
-                Delta[layer] = new double[N[layer]];
-                H[layer] = new double[N[layer]];
-                Theta[layer] = new double[N[layer]];
-                D_Theta[layer] = new double[N[layer]];
-                D_Theta_Prev[layer] = new double[N[layer]];
-            }
-            
-            if (layer + 1 < L)
-            {
-
-
-                W[layer] = new double[N[layer], N[layer + 1]];
-                D_W[layer] = new double[N[layer], N[layer + 1]];
-                D_W_Prev[layer] = new double[N[layer], N[layer + 1]];
+                W[layer] = new double[N[layer], N[layer - 1]];
+                D_W[layer] = new double[N[layer], N[layer - 1]];
+                D_W_Prev[layer] = new double[N[layer], N[layer - 1]];
             }
         }
 
@@ -147,7 +141,7 @@ public sealed class MyNeuralNetwork
                 E += Math.Abs((Ox[pattern]  - Z[pattern]) / Z[pattern]);
             }
 
-            var trainingError = 100 * E / datasets.TrainingSet[0].Length;
+            var trainingError = 100 * E;
 
             Logger.LogInformation($"Training error: {trainingError}");
         }
@@ -166,31 +160,30 @@ public sealed class MyNeuralNetwork
             E += Math.Abs((Ox[pattern]  - Z[pattern]) / Z[pattern]);
         }
 
-        var validationError = 100 * E / datasets.ValidationSet[0].Length;
+        var validationError = 100 * E;
 
         Logger.LogInformation($"Validation error: {validationError}");
     }
     
     private Task FeedForward(CancellationToken? cancellationToken)
     {
-        for (var layer = 1; layer < L - 1; layer++)
+        for (var layer = 1; layer < L; layer++)
         {
             //Logger.LogInformation($"On layer {layer}...");
 
             for (var i = 0; i < N[layer]; i++)
             {
                 double sum = 0;
-                for (var j = 0; j < Xi[layer - 1].Length; j++)
+                for (var j = 0; j < N[layer - 1]; j++)
                 {
                     cancellationToken?.ThrowIfCancellationRequested();
-                    Console.WriteLine($"{layer}:{i}:{j}");
-                    sum += W[layer][i, j] * Xi[layer][j];
+                    sum += W[layer][i, j] * Xi[layer - 1][j];
                 }
                 
                 var theta = Theta[layer][i];
                 var h = sum - theta;
                 H[layer][i] = h;
-                Xi[layer + 1][i] = Fact.Eval(h);
+                Xi[layer][i] = Fact.Eval(h);
             }
         }
 
@@ -228,7 +221,7 @@ public sealed class MyNeuralNetwork
 
     private Task UpdateWeights(double learningRate, double momentum, CancellationToken? cancellationToken)
     {
-        for (var layer = L - 1; layer >= 0; layer--)
+        for (var layer = L - 1; layer > 0; layer--)
         {
             for (var j = 0; j < N[layer - 1]; j++)
             {
@@ -342,7 +335,7 @@ public sealed class MyNeuralNetwork
     {
         //Logger.LogInformation("Initializing thresholds...");
         var rand = new Random();
-        for (var i = 1; i < Theta.Length; i++)
+        for (var i = 0; i < Theta.Length; i++)
         {
             for (var j = 0; j < Theta[i].Length; j++)
             {
