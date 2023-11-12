@@ -4,11 +4,11 @@ public sealed class MinMax : IScalingMethod
 {
     private (double Min, double Max) Range { get; }
 
-    public MinMax((double Min, double Max) range)
+    public MinMax(double rangeMin, double rangeMax)
     {
-        Range = range.Min < range.Max 
-            ? range
-            : throw new ArgumentException(nameof(range));
+        Range = rangeMin < rangeMax
+            ? (rangeMin, rangeMax)
+            : throw new ArgumentException(nameof(rangeMax));
     }
     
     public async Task<double[]> Scale(double[] data, CancellationToken? cancellationToken = null)

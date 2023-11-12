@@ -1,26 +1,37 @@
 ﻿{
    "dataFile": "A1-turbine.txt",
-   "trainingDataPercentage": 100,
-   "layers": 5,
-   "unitsPerLayer":  [4, 7, 5, 3, 1],
-   "epochs": 10,
-   "learningRate": 0.1,
+   "trainingDataPercentage": 60,
+   "testDataPercentage": 20,
+   "layers": 8,
+   "unitsPerLayer":  [4, 9, 9, 9, 7, 5, 3, 1],
+   "epochs": 100000,
+   "learningRate": 0.00001,
    "momentum": 0.7,
    "scalingConfiguration" : {
       "#height_over_sea_level" : {
-         "method" : "zscore"
+         "method" : "minmax",
+         "rangeMin" : 0.0,
+         "rangeMax" : 1.0
       },
       "fall" : {
-         "method" : "zscore"
+         "method" : "minmax",
+         "rangeMin" : 0.0,
+         "rangeMax" : 1.0
       },
       "net_fall" : {
-         "method" : "zscore"
+         "method" : "minmax",
+         "rangeMin" : 0.0,
+         "rangeMax" : 1.0
       },
       "flow" : {
-         "method" : "zscore"
+         "method" : "minmax",
+         "rangeMin" : 0.0,
+         "rangeMax" : 1.0
       },
       "power_of_hydroelectrical_turbine" : {
-         "method" : "zscore"
+         "method" : "minmax",
+         "rangeMin" : 0.0,
+         "rangeMax" : 1.0
       }
    },
    "activationFunction": "sigmoid"

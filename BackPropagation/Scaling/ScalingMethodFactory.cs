@@ -17,7 +17,7 @@ public class ScalingMethodFactory
         => configuration.Method switch
         {
             ZScore => new ZCore(),
-            MinMax => new MinMax(configuration.Range.Value),
+            MinMax => new MinMax(configuration.RangeMin, configuration.RangeMax),
             _ => throw new NotSupportedException(configuration.Method),
         };
 }

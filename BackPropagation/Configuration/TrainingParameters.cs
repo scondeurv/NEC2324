@@ -4,6 +4,7 @@ public sealed record TrainingParameters
 {
     public required string DataFile { get; init; }
     public required int TrainingDataPercentage { get; init; }
+    public required int TestDataPercentage { get; init; }
     public required int Layers { get; init; }
     public required int[] UnitsPerLayer { get; init; }
     public required int Epochs { get; init; }
