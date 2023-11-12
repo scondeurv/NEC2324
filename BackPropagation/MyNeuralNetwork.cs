@@ -38,28 +38,33 @@ public sealed class MyNeuralNetwork
 
         L = unitsPerLayer.Length;
         N = unitsPerLayer;
-        H = new double[L - 1][];
+        H = new double[L][];
         Xi = new double[L][];
         Xi[0] = new double[N[0]];
-        W = new double[L - 1][,];
-        D_W = new double[L - 1][,];
-        D_W_Prev = new double[L - 1][,];
-        Theta = new double[L - 1][];
-        D_Theta = new double[L - 1][];
-        D_Theta_Prev = new double[L - 1][];
+        W = new double[L][,];
+        D_W = new double[L][,];
+        D_W_Prev = new double[L][,];
+        Theta = new double[L][];
+        D_Theta = new double[L][];
+        D_Theta_Prev = new double[L][];
         Delta = new double[L][];
         for (var layer = 0; layer < L; layer++)
         {
             Xi[layer] = new double[N[layer]];
-            Delta[layer] = new double[N[layer]];
 
+            if (layer > 0)
+            {
+                Delta[layer] = new double[N[layer]];
+                H[layer] = new double[N[layer]];
+                Theta[layer] = new double[N[layer]];
+                D_Theta[layer] = new double[N[layer]];
+                D_Theta_Prev[layer] = new double[N[layer]];
+            }
+            
             if (layer + 1 < L)
             {
-                H[layer] = new double[N[layer + 1]];
-                H[layer] = new double[N[layer + 1]];
-                Theta[layer] = new double[N[layer + 1]];
-                D_Theta[layer] = new double[N[layer + 1]];
-                D_Theta_Prev[layer] = new double[N[layer + 1]];
+
+
                 W[layer] = new double[N[layer], N[layer + 1]];
                 D_W[layer] = new double[N[layer], N[layer + 1]];
                 D_W_Prev[layer] = new double[N[layer], N[layer + 1]];
@@ -168,20 +173,20 @@ public sealed class MyNeuralNetwork
     
     private Task FeedForward(CancellationToken? cancellationToken)
     {
-        for (var layer = 0; layer < L - 1; layer++)
+        for (var layer = 1; layer < L - 1; layer++)
         {
             //Logger.LogInformation($"On layer {layer}...");
 
-            for (var i = 0; i < W[layer].GetLength(1); i++)
+            for (var i = 0; i < N[layer]; i++)
             {
                 double sum = 0;
-                for (var j = 0; j < Xi[layer].Length; j++)
+                for (var j = 0; j < Xi[layer - 1].Length; j++)
                 {
                     cancellationToken?.ThrowIfCancellationRequested();
-
-                    sum += W[layer][j, i] * Xi[layer][j];
+                    Console.WriteLine($"{layer}:{i}:{j}");
+                    sum += W[layer][i, j] * Xi[layer][j];
                 }
-
+                
                 var theta = Theta[layer][i];
                 var h = sum - theta;
                 H[layer][i] = h;
@@ -194,27 +199,27 @@ public sealed class MyNeuralNetwork
 
     private Task BackPropagate(double ox, double z, CancellationToken? cancellationToken)
     {
-        for (var i = 0; i < Delta[L - 1].Length; i++)
+        for (var i = 0; i < N[L - 1]; i++)
         {
             cancellationToken?.ThrowIfCancellationRequested();
 
-            Delta[L - 1][i] = Fact.Derivative(H[L - 2][i]) * (ox - z);
+            Delta[L - 1][i] = Fact.Derivative(H[L - 1][i]) * (ox - z);
         }
 
-        for (var layer = L - 2; layer >= 1; layer--)
+        for (var layer = L - 1; layer >= 1; layer--)
         {
             cancellationToken?.ThrowIfCancellationRequested();
 
             var sum = 0.0;
-            for (var j = 0; j < N[layer]; j++)
+            for (var j = 0; j < N[layer - 1]; j++)
             {
-                for (var i = 0; i < N[layer + 1]; i++)
+                for (var i = 0; i < N[layer]; i++)
                 {
-                    sum += Delta[layer + 1][i] * W[layer][j, i];
+                    sum += Delta[layer][i] * W[layer][i, j];
                 }
 
                 var gPrime = Fact.Derivative(H[layer - 1][j]);
-                Delta[layer][j] = gPrime * sum;
+                Delta[layer - 1][j] = gPrime * sum;
             }
         }
 
@@ -223,15 +228,15 @@ public sealed class MyNeuralNetwork
 
     private Task UpdateWeights(double learningRate, double momentum, CancellationToken? cancellationToken)
     {
-        for (var layer = L - 2; layer >= 0; layer--)
+        for (var layer = L - 1; layer >= 0; layer--)
         {
-            for (var j = 0; j < N[layer + 1]; j++)
+            for (var j = 0; j < N[layer - 1]; j++)
             {
                 for (var i = 0; i < N[layer]; i++)
                 {
                     cancellationToken?.ThrowIfCancellationRequested();
 
-                    D_W[layer][i, j] = -learningRate * Delta[layer][i] * Xi[layer + 1][j] +
+                    D_W[layer][i, j] = -learningRate * Delta[layer][i] * Xi[layer - 1][j] +
                                        momentum * D_W_Prev[layer][i, j];
                     D_W_Prev[layer][i, j] = D_W[layer][i, j];
                     W[layer][i, j] += D_W[layer][i, j];
@@ -244,9 +249,9 @@ public sealed class MyNeuralNetwork
 
     private Task UpdateThresholds(double learningRate, double momentum, CancellationToken? cancellationToken)
     {
-        for (var layer = L - 2; layer >= 1; layer--)
+        for (var layer = L - 1; layer >= 0; layer--)
         {
-            for (var i = 0; i < N[layer + 1]; i++)
+            for (var i = 0; i < N[layer]; i++)
             {
                 cancellationToken?.ThrowIfCancellationRequested();
 
@@ -261,10 +266,10 @@ public sealed class MyNeuralNetwork
 
     private Task InitXi(double[][] data, int pattern, CancellationToken? cancellationToken)
     {
-        for (var i = 0; i < Xi[0].Length; i++)
+        for (var feature = 0; feature < Xi[0].Length; feature++)
         {
             cancellationToken?.ThrowIfCancellationRequested();
-            Xi[0][i] = data[i][pattern];
+            Xi[0][feature] = data[pattern][feature];
         }
 
         return Task.CompletedTask;
@@ -280,42 +285,33 @@ public sealed class MyNeuralNetwork
             return (data, Array.Empty<double[]>());
         }
         var shuffledData = await Shuffle(data, cancellationToken);
-        var trainingSize = (int)(shuffledData[0].Length * ( 1 - validationPercentage));
-        var validationSize = shuffledData[0].Length - trainingSize;
+        var trainingSize = (int)(shuffledData.Length * ( 1 - validationPercentage));
+        var validationSize = shuffledData.Length - trainingSize;
 
-        var trainingSet = new double[data.Length][];
-        var validationSet = new double[data.Length][];
+        var trainingSet = new double[trainingSize][];
+        var validationSet = new double[validationSize][];
 
-        for (var feature = 0; feature < data.Length; feature++)
+        for (var row = 0; row < trainingSize; row++)
         {
-            trainingSet[feature] = new double[trainingSize];
-            Array.Copy(shuffledData[feature], 0, trainingSet[feature], 0, trainingSize);
-            validationSet[feature] = new double[validationSize];
-            Array.Copy(shuffledData[feature], trainingSize, validationSet[feature], 0,
-                validationSize);
+            trainingSet[row] = data[row];
+        }
+
+        for (var row = trainingSize; row < shuffledData.Length; row++)
+        {
+            validationSet[row - trainingSize] = data[row];
         }
 
         return (trainingSet, validationSet);
     }
 
+
     private Task<double[][]> Shuffle(double[][] data, CancellationToken? cancellationToken)
     {
         var random = new Random();
-        var swapped = new SortedSet<int>();
-        for (var col = 0; col < data[0].Length; col++)
+        for (var row = 0; row < data.Length; row++)
         {
-            for (var row = 0; row < data.Length; row++)
-            {
-                int? newCol = null;
-                while (newCol is null)
-                {
-                    cancellationToken?.ThrowIfCancellationRequested();
-                    var rand = random.Next(0, data[0].Length);
-                    newCol = !swapped.Contains(rand) && rand != col ? rand : null;
-                }
-
-                (data[row][col], data[row][newCol.Value]) = (data[row][newCol.Value], data[row][col]);
-            }
+                var newRow = random.Next(0, data.Length - 1);
+                (data[newRow], data[row]) = (data[row], data[newRow]);
         }
 
         return Task.FromResult(data);
@@ -327,6 +323,7 @@ public sealed class MyNeuralNetwork
         var rand = new Random();
         foreach (var w in W)
         {
+            if (w is null) continue;
             for (var i = 0; i < w.GetLength(0); i++)
             {
                 for (var j = 0; j < w.GetLength(1); j++)
@@ -345,8 +342,7 @@ public sealed class MyNeuralNetwork
     {
         //Logger.LogInformation("Initializing thresholds...");
         var rand = new Random();
-
-        for (var i = 0; i < Theta.Length; i++)
+        for (var i = 1; i < Theta.Length; i++)
         {
             for (var j = 0; j < Theta[i].Length; j++)
             {
@@ -384,8 +380,12 @@ public sealed class MyNeuralNetwork
 
             if (Features.Contains(feature))
             {
-                var featureIndex = features.IndexOf(feature);
-                var featureData = data[featureIndex];
+                var col = features.IndexOf(feature);
+                var featureData = new double[data.Length];
+                for (var row = 0; row < data.Length; row++)
+                {
+                    featureData[row] = data[row][col];
+                }
                 var scalingMethod = scalingMethodPerFeature[feature];
                 scalingTasks.Add(scalingMethod.Scale(featureData, cancellationToken));
             }
@@ -395,7 +395,17 @@ public sealed class MyNeuralNetwork
             }
         }
 
-        var scaledData = await Task.WhenAll(scalingTasks);
+        var results =  await Task.WhenAll(scalingTasks);
+        var scaledData = new double[data.Length][];
+        for (var row = 0; row < data.Length; row++)
+        {
+            scaledData[row] = new double[data[0].Length];
+
+            for (var col = 0; col < data[0].Length; col++)
+            {
+                scaledData[row][col] = results[col][row];
+            }
+        }
         return scaledData;
     }
 }

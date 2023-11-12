@@ -41,17 +41,6 @@ public class DataFile
             }
         }
 
-        Data = new double[loadedData[0].Length][];
-        for (var row = 0; row < Data.Length; row++)
-        {
-            Data[row] = new double[loadedData.Count];
-            
-            for (var col = 0; col < loadedData.Count; col++)
-            {
-                cancellationToken?.ThrowIfCancellationRequested();
-
-                Data[row][col] = loadedData[col][row];
-            }   
-        }
+        Data = loadedData.ToArray();
     }
 }
