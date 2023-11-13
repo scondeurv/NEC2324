@@ -1,0 +1,42 @@
+﻿{
+   "dataFile": "A1-synthetic.txt",
+   "validationPercentage": 0.2,
+   "layers": 5,
+   "unitsPerLayer":  [9, 13, 7, 5, 1],
+   "epochs": 9000,
+   "learningRate": 0.001,
+   "momentum": 0.9,
+   "scalingConfiguration" : {
+      "#v1" : {
+         "method" : "zscore"
+      },
+      "v2" : {
+         "method" : "zscore"
+      },
+      "v3" : {
+         "method" : "zscore"
+      },
+      "v4" : {
+         "method" : "zscore"
+      },
+      "v5" : {
+         "method" : "zscore"
+      },
+      "v6" : {
+         "method" : "zscore"
+      },
+      "v7" : {
+         "method" : "zscore"
+      },
+      "v8" : {
+         "method" : "zscore"
+      },
+      "v9" : {
+         "method" : "zscore"
+      },
+      "z" : {
+         "method" : "zscore"
+      }
+   },
+   "activationFunction": "sigmoid"
+}

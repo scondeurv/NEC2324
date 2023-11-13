@@ -13,16 +13,28 @@
       <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="7.0.0" />
       <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="7.0.0" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+      <PackageReference Include="OxyPlot.Core" Version="2.1.2" />
+      <PackageReference Include="OxyPlot.Core.Drawing" Version="2.1.0" />
+      <PackageReference Include="OxyPlot.ImageSharp" Version="2.1.2" />
     </ItemGroup>
 
     <ItemGroup>
       <None Update="A1-turbine.txt">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
-      <None Update="A1-turbine.zscore.json">
+      <None Update="A1-turbine.json">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
-      <None Update="A1-turbine.minmax.json">
+      <None Update="A1-synthetic.txt">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="winequality-red.csv">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="A1-synthetic.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="winequality-red.json">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
     </ItemGroup>

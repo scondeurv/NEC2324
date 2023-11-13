@@ -5,7 +5,7 @@ namespace BackPropagation;
 
 public class DataFile
 {
-    private const string CsvExtension = @"csv";
+    private const string CsvExtension = @".csv";
 
     private const string CsvDelimiter = @",";
     private const string OtherDelimiter = @"\s+";

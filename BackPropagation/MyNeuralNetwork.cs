@@ -81,9 +81,7 @@ public sealed class MyNeuralNetwork
         double[][] data;
         if (scalingPerFeature.Any())
         {
-            //Logger.LogInformation("Scaling features...");
             data = await ScaleData(Data, scalingPerFeature, cancellationToken);
-            //Logger.LogInformation("Features scaled.");
         }
         else
         {
@@ -95,37 +93,22 @@ public sealed class MyNeuralNetwork
             InitializeThresholds((0, 1), cancellationToken));
 
         var datasets = await SplitDataSet(data, ValidationPercentage, cancellationToken);
-
+        var plotData = new List<(double, double)>(Epochs);
         for (var epoch = 1; epoch <= Epochs; epoch++)
         {
             cancellationToken?.ThrowIfCancellationRequested();
-
-            //Logger.LogInformation($"Running Epoch {epoch}...");
+            
             var rand = new Random();
 
             for (var i = 0; i < datasets.TrainingSet.Length; i++)
             {
                 var pattern = rand.Next(0, datasets.TrainingSet.Length);
-                //Logger.LogInformation($"Feed forward {epoch}.{pattern}...");
-
                 await InitXi(datasets.TrainingSet, pattern, cancellationToken);
                 await FeedForward(cancellationToken);
-
-                //Logger.LogInformation($"Feed forward {epoch}.{pattern} ended");
-
-                //Logger.LogInformation($"Back propagation {epoch}.{pattern}...");
-                
                 await BackPropagate(ox: Xi[^1][0], z: datasets.TrainingSet[pattern][^1], cancellationToken);
-
-                //Logger.LogInformation($"Back propagation ended: {epoch}.{pattern} ");
-
-                //Logger.LogInformation($"Updating weights and thresholds: {epoch}.{pattern}...");
-
                 await Task.WhenAll(
                     UpdateWeights(learningRate, momentum, cancellationToken),
                     UpdateThresholds(learningRate, momentum, cancellationToken));
-
-                //Logger.LogInformation($"Weight and thresholds updated: {epoch}.{pattern}...");
             }
 
             Y = new double[data.Length];
@@ -133,40 +116,68 @@ public sealed class MyNeuralNetwork
             E = 0;
             for (var pattern = 0; pattern < datasets.TrainingSet.Length; pattern++)
             {
-                //Logger.LogInformation($"Feed forward {epoch}.{pattern}...");
-
                 await InitXi(datasets.TrainingSet, pattern, cancellationToken);
                 await FeedForward(cancellationToken);
 
-                var outputScalingMethod = scalingPerFeature[Features[^1]];
-                Y[pattern] = (await outputScalingMethod.Descale(new [] { Xi[^1][0] }, cancellationToken))[0];
-                Z[pattern] = (await outputScalingMethod.Descale(new [] { datasets.TrainingSet[pattern][^1] }, cancellationToken))[0];
-
+                if (scalingPerFeature.TryGetValue(Features[^1], out var outputScalingMethod))
+                {
+                    Y[pattern] = (await outputScalingMethod.Descale(new [] { Xi[^1][0] }, cancellationToken))[0];
+                    Z[pattern] = (await outputScalingMethod.Descale(new [] { datasets.TrainingSet[pattern][^1] }, cancellationToken))[0];
+                }
+                else
+                {
+                    Y[pattern] = Xi[^1][0];
+                    Z[pattern] = datasets.TrainingSet[pattern][^1];
+                }
+                
                 E += Math.Abs((Y[pattern] - Z[pattern])/Z[pattern]);
             }
 
             var trainingError = 100 * E / datasets.TrainingSet.Length;
-
+            plotData.Add((epoch, trainingError));
             Logger.LogInformation($"Training error: {trainingError}");
         }
 
+        var plotExporter = new PlotExporter();
+        
+        plotExporter.ExportLinear(
+            $"MAPE vs Epoch (\u03B7: {learningRate:F4}, \u03B1: {momentum:F4})", 
+            "Epoch", 
+            "MAPE",
+            new Dictionary<string, (double X, double Y)[]> {
+                { string.Empty, plotData.ToArray()}
+            },
+            $"MapeVsEpoch-{DateTime.Now:yyyyMMddhhmmss}");
+        
         Y = new double[data.Length];
         Z = new double[data.Length];
         E = 0;
+        var scatterData = new List<(double, double)>(datasets.ValidationSet.Length);
         for (var pattern = 0; pattern < datasets.ValidationSet.Length; pattern++)
         {
-            //Logger.LogInformation($"Feed forward {epoch}.{pattern}...");
-
             await InitXi(datasets.ValidationSet, pattern, cancellationToken);
             await FeedForward(cancellationToken);
             
-            var outputScalingMethod = scalingPerFeature[Features[^1]];
-            Y[pattern] = (await outputScalingMethod.Descale(new [] { Xi[^1][0] }, cancellationToken))[0];
-            Z[pattern] = (await outputScalingMethod.Descale(new [] { datasets.ValidationSet[pattern][^1] }, cancellationToken))[0];
-
+            if (scalingPerFeature.TryGetValue(Features[^1], out var outputScalingMethod))
+            {
+                Y[pattern] = (await outputScalingMethod.Descale(new [] { Xi[^1][0] }, cancellationToken))[0];
+                Z[pattern] = (await outputScalingMethod.Descale(new [] { datasets.ValidationSet[pattern][^1] }, cancellationToken))[0];
+            }
+            else
+            {
+                Y[pattern] = Xi[^1][0];
+                Z[pattern] = datasets.ValidationSet[pattern][^1];
+            }
+            
+            scatterData.Add((Y[pattern], Z[pattern]));
             E += Math.Abs((Y[pattern] - Z[pattern])/Z[pattern]);
         }
-
+        plotExporter.ExportScatter(
+            $"Actual Vs Prediction (\u03B7: {learningRate:F4}, \u03B1: {momentum:F4})", 
+            "Prediction", 
+            "Actual",
+            scatterData.ToArray(),
+            $"ActualVsPrediction-{DateTime.Now:yyyyMMddhhmmss}");
         var validationError = 100 * E / datasets.ValidationSet.Length;
 
         Logger.LogInformation($"Validation error: {validationError}");
@@ -176,8 +187,6 @@ public sealed class MyNeuralNetwork
     {
         for (var layer = 1; layer < L; layer++)
         {
-            //Logger.LogInformation($"On layer {layer}...");
-
             for (var i = 0; i < N[layer]; i++)
             {
                 double sum = 0;
@@ -305,7 +314,6 @@ public sealed class MyNeuralNetwork
         return (trainingSet, validationSet);
     }
 
-
     private Task<double[][]> Shuffle(double[][] data, CancellationToken? cancellationToken)
     {
         var random = new Random();
@@ -320,7 +328,6 @@ public sealed class MyNeuralNetwork
 
     private Task InitializeWeights((double Min, double Max) range, CancellationToken? cancellationToken)
     {
-        //Logger.LogInformation("Initializing weights...");
         var rand = new Random();
         foreach (var w in W)
         {
@@ -334,14 +341,12 @@ public sealed class MyNeuralNetwork
                 }
             }
         }
-
-        //Logger.LogInformation("Weights initialized.");
+        
         return Task.CompletedTask;
     }
 
     private Task InitializeThresholds((double Min, double Max) range, CancellationToken? cancellationToken)
     {
-        //Logger.LogInformation("Initializing thresholds...");
         var rand = new Random();
         for (var i = 0; i < Theta.Length; i++)
         {
@@ -351,8 +356,7 @@ public sealed class MyNeuralNetwork
                 Theta[i][j] = rand.NextDouble(range.Min, range.Max);
             }
         }
-
-        //Logger.LogInformation("Thresholds initialized.");
+        
         return Task.CompletedTask;
     }
 
@@ -362,6 +366,7 @@ public sealed class MyNeuralNetwork
     {
         var features = scalingMethodPerFeature.Keys.ToList();
         var scalingTasks = new List<Task<double[]>>();
+        var featureIndexes = new List<int>();
         foreach (var feature in features)
         {
             cancellationToken?.ThrowIfCancellationRequested();
@@ -369,6 +374,7 @@ public sealed class MyNeuralNetwork
             if (Features.Contains(feature))
             {
                 var col = features.IndexOf(feature);
+                featureIndexes.Add(col);
                 var featureData = new double[data.Length];
                 for (var row = 0; row < data.Length; row++)
                 {
@@ -392,7 +398,14 @@ public sealed class MyNeuralNetwork
 
             for (var col = 0; col < data[0].Length; col++)
             {
-                scaledData[row][col] = results[col][row];
+                if (featureIndexes.Contains(col))
+                {
+                    scaledData[row][col] = results[col][row];
+                }
+                else
+                {
+                    scaledData[row][col] = data[row][col];
+                }
             }
         }
 
