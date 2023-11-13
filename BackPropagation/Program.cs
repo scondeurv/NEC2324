@@ -14,7 +14,7 @@ using var loggerFactory = LoggerFactory.Create(builder =>
         .AddConsole();
 });
 
-var logger = loggerFactory.CreateLogger<Program>();
+var logger = loggerFactory.CreateLogger<MyNeuralNetwork>();
 var parametersFile = args[0];
 
 if (string.IsNullOrWhiteSpace(parametersFile))
@@ -37,24 +37,46 @@ await dataFile.Load(parameters.DataFile);
 var cancellationTokenSource = new CancellationTokenSource();
 try
 {
-    var nn = new MyNeuralNetwork(logger, dataFile.Features, dataFile.Data, parameters.UnitsPerLayer,
-        parameters.ActivationFunction, parameters.Epochs, parameters.ValidationPercentage);
+    var nn = new MyNeuralNetwork(logger, parameters.UnitsPerLayer,
+        parameters.ActivationFunction, parameters.Epochs, parameters.ValidationPercentage, parameters.LearningRate,
+        parameters.Momentum);
+    
     var factory = new ScalingMethodFactory();
     var scalingPerFeature = factory.CreatePerFeature(parameters.ScalingConfiguration);
-    await nn.Fit(parameters.LearningRate, parameters.Momentum, scalingPerFeature, cancellationTokenSource.Token);
+    var data = dataFile.Data;
+    if (scalingPerFeature.Any())
+    {
+        logger.LogInformation("Scaling data...");
+        var scaler = new DataScaler();
+        data = await scaler.Scale(dataFile.Data, dataFile.Features, scalingPerFeature, cancellationTokenSource.Token);
+    }
+        
+    await nn.Fit(data, dataFile.Features, cancellationTokenSource.Token);
+    var predictions = await nn.Predict(data, cancellationTokenSource.Token);
+    
     var errors = nn.LossEpochs();
+    logger.LogInformation("Exporting plots...");
     var plotExporter = new PlotExporter();
     var filename = Path.GetFileNameWithoutExtension(parameters.DataFile);
     plotExporter.ExportLinear(
         $"Error vs Epoch (\u03B7: {parameters.LearningRate:F4}, \u03B1: {parameters.Momentum:F4})",
         "Epoch",
-        "MAPE",
+        "MSE",
         new Dictionary<string, (double X, double Y)[]>
         {
-            { "Training", errors.TrainingErrors.Select((e, epoch) => ((double)epoch, e) ).ToArray() },
-            { "Validation", errors.ValidationErrors.Select((e, epoch) => ((double)epoch, e) ).ToArray() }
+            { "Training", errors.TrainingErrors.Select((e, epoch) => ((double)epoch, e)).ToArray() },
+            { "Validation", errors.ValidationErrors.Select((e, epoch) => ((double)epoch, e)).ToArray() }
         },
         $"{filename}-error-{DateTime.Now:yyyyMMddhhmmss}");
+    
+    plotExporter.ExportScatter(
+        $"Actual vs Prediction (\u03B7: {parameters.LearningRate:F4}, \u03B1: {parameters.Momentum:F4})",
+        "Actual",
+        "Prediction",
+        data.Select((pattern, index) => (pattern[^1], predictions[index])).ToArray(),
+        $"{filename}-scatter-{DateTime.Now:yyyyMMddhhmmss}");
+    
+    logger.LogInformation("Work done");
 }
 catch
 {

@@ -1,41 +1,61 @@
 ﻿{
    "dataFile": "A1-synthetic.txt",
    "validationPercentage": 0.2,
-   "layers": 5,
-   "unitsPerLayer":  [9, 13, 7, 3, 1],
-   "epochs": 2000,
+   "layers": 4,
+   "unitsPerLayer":  [9, 5, 3, 1],
+   "epochs": 300,
    "learningRate": 0.1,
-   "momentum": 0.2,
+   "momentum": 0.8,
    "scalingConfiguration" : {
       "#v1" : {
-         "method" : "zscore"
+         "method" : "minmax",
+         "rangeMin" : 0.0,
+         "rangeMax" : 1.0
       },
       "v2" : {
-         "method" : "zscore"
+         "method" : "minmax",
+         "rangeMin" : 0.0,
+         "rangeMax" : 1.0
       },
       "v3" : {
-         "method" : "zscore"
+         "method" : "minmax",
+         "rangeMin" : 0.0,
+         "rangeMax" : 1.0
       },
       "v4" : {
-         "method" : "zscore"
+         "method" : "minmax",
+         "rangeMin" : 0.0,
+         "rangeMax" : 1.0
       },
       "v5" : {
-         "method" : "zscore"
+         "method" : "minmax",
+         "rangeMin" : 0.0,
+         "rangeMax" : 1.0
       },
       "v6" : {
-         "method" : "zscore"
+         "method" : "minmax",
+         "rangeMin" : 0.0,
+         "rangeMax" : 1.0
       },
       "v7" : {
-         "method" : "zscore"
+         "method" : "minmax",
+         "rangeMin" : 0.0,
+         "rangeMax" : 1.0
       },
       "v8" : {
-         "method" : "zscore"
+         "method" : "minmax",
+         "rangeMin" : 0.0,
+         "rangeMax" : 1.0
       },
       "v9" : {
-         "method" : "zscore"
+         "method" : "minmax",
+         "rangeMin" : 0.0,
+         "rangeMax" : 1.0
       },
       "z" : {
-         "method" : "zscore"
+         "method" : "minmax",
+         "rangeMin" : 0.0,
+         "rangeMax" : 1.0
       }
    },
    "activationFunction": "sigmoid"
