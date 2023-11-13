@@ -11,23 +11,25 @@ public sealed class MyNeuralNetwork
     private ILogger Logger { get; }
     private string[] Features { get; }
     private double[][] Data { get; }
-    private int L { get; } //Number of layers
-    private int[] N { get; } //Units per layer
-    private double[][] H { get; } // Fields
-    private double[][] Xi { get; } // Activations
-    private double[][,] W { get; } // Weights
-    private double[][] Theta { get; } //Thresholds
-    private double[][] Delta { get; } // Error propagation
-    private double[][,] D_W { get; } //Weight changes
-    private double[][] D_Theta { get; } //Threshold changes
-    private double[][,] D_W_Prev { get; } //Weight previous changes
-    private double[][] D_Theta_Prev { get; } //Threshold previous changes
     private IActivationFunction Fact { get; }
     private int Epochs { get; }
     private double ValidationPercentage { get; }
+    private int L { get; } //Number of layers
+    private int[] N { get; } //Units per layer
+    private double[][] H { get; set; } // Fields
+    private double[][] Xi { get; set; } // Activations
+    private double[][,] W { get; set; } // Weights
+    private double[][] Theta { get; set; } //Thresholds
+    private double[][] Delta { get; set; } // Error propagation
+    private double[][,] D_W { get; set; } //Weight changes
+    private double[][] D_Theta { get; set; } //Threshold changes
+    private double[][,] D_W_Prev { get; set; } //Weight previous changes
+    private double[][] D_Theta_Prev { get; set; } //Threshold previous changes
+    private double[] TrainingErrors { get; set; }
+    private double[] ValidationErrors { get; set; }
 
     public MyNeuralNetwork(ILogger logger, string[] features, double[][] data, int[] unitsPerLayer,
-        ActivationFunctionType fact, int epochs, double validationPercentage)
+        ActivationFunctionType fact, int epochs, double validationPercentage, string? outputDir = null)
     {
         Logger = logger;
         Features = features;
@@ -35,6 +37,81 @@ public sealed class MyNeuralNetwork
 
         L = unitsPerLayer.Length;
         N = unitsPerLayer;
+
+        var factory = new ActivationFunctionFactory();
+        Fact = factory.Create(fact);
+
+        Epochs = epochs;
+        ValidationPercentage = validationPercentage;
+    }
+
+    public async Task Fit(double learningRate, double momentum,
+        IReadOnlyDictionary<string, IScalingMethod>? scalingPerFeature = null,
+        CancellationToken? cancellationToken = null)
+    {
+        Init();
+        double[][] data;
+        if (scalingPerFeature.Any())
+        {
+            data = await ScaleData(Data, scalingPerFeature, cancellationToken);
+        }
+        else
+        {
+            data = Data;
+        }
+
+        await Task.WhenAll(
+            InitializeWeights((0, 1), cancellationToken),
+            InitializeThresholds((0, 1), cancellationToken));
+
+        var datasets = await SplitDataSet(data, ValidationPercentage, cancellationToken);
+        
+        for (var epoch = 1; epoch <= Epochs; epoch++)
+        {
+            cancellationToken?.ThrowIfCancellationRequested();
+            
+            var rand = new Random();
+
+            foreach (var t in datasets.TrainingSet)
+            {
+                var pattern = rand.Next(0, datasets.TrainingSet.Length);
+                await InitXi(datasets.TrainingSet, pattern, cancellationToken);
+                await FeedForward(cancellationToken);
+                await BackPropagate(ox: Xi[^1][0], z: datasets.TrainingSet[pattern][^1], cancellationToken);
+                await Task.WhenAll(
+                    UpdateWeights(learningRate, momentum, cancellationToken),
+                    UpdateThresholds(learningRate, momentum, cancellationToken));
+            }
+
+            scalingPerFeature.TryGetValue(Features[^1], out var outputScalingMethod);
+            TrainingErrors[epoch] = await CalculateMape(datasets.TrainingSet, outputScalingMethod, cancellationToken);
+            ValidationErrors[epoch] =
+                await CalculateMape(datasets.ValidationSet, outputScalingMethod, cancellationToken);
+        }
+    }
+
+    public (double[] TrainingErrors, double[] ValidationErrors) LossEpochs() => (TrainingErrors, ValidationErrors);
+
+    public async Task<double[]> Predict(double[][] data, CancellationToken? cancellationToken = null)
+    {
+        if (data.GetLength(1) != N[0])
+        {
+            throw new ArgumentException($"Data should have {N[0]} features");
+        }
+
+        var predictions = new List<double>();
+        for (var pattern = 0; pattern < data.Length; pattern++)
+        {
+            await InitXi(data, pattern, cancellationToken);
+            var prediction = await FeedForward(cancellationToken);
+            predictions.Add(prediction);
+        }
+
+        return predictions.ToArray();
+    }
+
+    private void Init()
+    {
         H = new double[L][];
         Xi = new double[L][];
         Xi[0] = new double[N[0]];
@@ -60,124 +137,12 @@ public sealed class MyNeuralNetwork
                 D_W_Prev[layer] = new double[N[layer], N[layer - 1]];
             }
         }
-
-        var factory = new ActivationFunctionFactory();
-        Fact = factory.Create(fact);
-
-        Epochs = epochs;
-        ValidationPercentage = validationPercentage;
+        
+        TrainingErrors = new double[Epochs];
+        ValidationErrors = new double[Epochs];
     }
 
-    public async Task Fit(double learningRate, double momentum,
-        IReadOnlyDictionary<string, IScalingMethod>? scalingPerFeature = null,
-        CancellationToken? cancellationToken = null)
-    {
-        double[][] data;
-        if (scalingPerFeature.Any())
-        {
-            data = await ScaleData(Data, scalingPerFeature, cancellationToken);
-        }
-        else
-        {
-            data = Data;
-        }
-
-        await Task.WhenAll(
-            InitializeWeights((0, 1), cancellationToken),
-            InitializeThresholds((0, 1), cancellationToken));
-
-        var datasets = await SplitDataSet(data, ValidationPercentage, cancellationToken);
-        var plotData = new List<(double, double)>(Epochs);
-        for (var epoch = 1; epoch <= Epochs; epoch++)
-        {
-            cancellationToken?.ThrowIfCancellationRequested();
-            
-            var rand = new Random();
-
-            for (var i = 0; i < datasets.TrainingSet.Length; i++)
-            {
-                var pattern = rand.Next(0, datasets.TrainingSet.Length);
-                await InitXi(datasets.TrainingSet, pattern, cancellationToken);
-                await FeedForward(cancellationToken);
-                await BackPropagate(ox: Xi[^1][0], z: datasets.TrainingSet[pattern][^1], cancellationToken);
-                await Task.WhenAll(
-                    UpdateWeights(learningRate, momentum, cancellationToken),
-                    UpdateThresholds(learningRate, momentum, cancellationToken));
-            }
-
-            var trainingY = new double[datasets.TrainingSet.Length];
-            var trainingZ = new double[datasets.TrainingSet.Length];
-            var trainingE = 0.0;
-            for (var pattern = 0; pattern < datasets.TrainingSet.Length; pattern++)
-            {
-                await InitXi(datasets.TrainingSet, pattern, cancellationToken);
-                await FeedForward(cancellationToken);
-
-                if (scalingPerFeature.TryGetValue(Features[^1], out var outputScalingMethod))
-                {
-                    trainingY[pattern] = (await outputScalingMethod.Descale(new [] { Xi[^1][0] }, cancellationToken))[0];
-                    trainingZ[pattern] = (await outputScalingMethod.Descale(new [] { datasets.TrainingSet[pattern][^1] }, cancellationToken))[0];
-                }
-                else
-                {
-                    trainingY[pattern] = Xi[^1][0];
-                    trainingZ[pattern] = datasets.TrainingSet[pattern][^1];
-                }
-                
-                trainingE += Math.Abs((trainingY[pattern] - trainingZ[pattern])/trainingZ[pattern]);
-            }
-
-            var trainingError = 100 * trainingE / datasets.TrainingSet.Length;
-            plotData.Add((epoch, trainingError));
-            Logger.LogInformation($"Training error: {trainingError}");
-        }
-
-        var plotExporter = new PlotExporter();
-        
-        plotExporter.ExportLinear(
-            $"MAPE vs Epoch (\u03B7: {learningRate:F4}, \u03B1: {momentum:F4})", 
-            "Epoch", 
-            "MAPE",
-            new Dictionary<string, (double X, double Y)[]> {
-                { string.Empty, plotData.ToArray()}
-            },
-            $"MapeVsEpoch-{DateTime.Now:yyyyMMddhhmmss}");
-        
-        var validationY = new double[datasets.ValidationSet.Length];
-        var validationZ = new double[datasets.ValidationSet.Length];
-        var validationE = 0.0;
-        var scatterData = new List<(double, double)>(datasets.ValidationSet.Length);
-        for (var pattern = 0; pattern < datasets.ValidationSet.Length; pattern++)
-        {
-            await InitXi(datasets.ValidationSet, pattern, cancellationToken);
-            await FeedForward(cancellationToken);
-            
-            if (scalingPerFeature.TryGetValue(Features[^1], out var outputScalingMethod))
-            {
-                validationY[pattern] = (await outputScalingMethod.Descale(new [] { Xi[^1][0] }, cancellationToken))[0];
-                validationZ[pattern] = (await outputScalingMethod.Descale(new [] { datasets.ValidationSet[pattern][^1] }, cancellationToken))[0];
-            }
-            else
-            {
-                validationY[pattern] = Xi[^1][0];
-                validationZ[pattern] = datasets.ValidationSet[pattern][^1];
-            }
-            
-            scatterData.Add((validationY[pattern], validationZ[pattern]));
-            validationE += Math.Abs((validationY[pattern] - validationZ[pattern])/validationZ[pattern]);
-        }
-        plotExporter.ExportScatter(
-            $"Actual Vs Prediction (\u03B7: {learningRate:F4}, \u03B1: {momentum:F4})", 
-            "Prediction", 
-            "Actual",
-            scatterData.ToArray(),
-            $"ActualVsPrediction-{DateTime.Now:yyyyMMddhhmmss}");
-        var validationError = 100 * validationE / datasets.ValidationSet.Length;
-
-        Logger.LogInformation($"Validation error: {validationError}");
-    }
-
-    private Task FeedForward(CancellationToken? cancellationToken)
+    private Task<double> FeedForward(CancellationToken? cancellationToken)
     {
         for (var layer = 1; layer < L; layer++)
         {
@@ -197,7 +162,7 @@ public sealed class MyNeuralNetwork
             }
         }
 
-        return Task.CompletedTask;
+        return Task.FromResult(Xi[^1][0]);
     }
 
     private Task BackPropagate(double ox, double z, CancellationToken? cancellationToken)
@@ -275,6 +240,14 @@ public sealed class MyNeuralNetwork
             Xi[0][feature] = data[pattern][feature];
         }
 
+        for (var i = 1; i < Xi.Length; i++)
+        {
+            for (var j = 0; i < Xi[j].Length; j++)
+            {
+                Xi[i][j] = 0;
+            }
+        }
+
         return Task.CompletedTask;
     }
 
@@ -313,6 +286,7 @@ public sealed class MyNeuralNetwork
         var random = new Random();
         for (var row = 0; row < data.Length; row++)
         {
+            cancellationToken?.ThrowIfCancellationRequested();
             var newRow = random.Next(0, data.Length - 1);
             (data[newRow], data[row]) = (data[row], data[newRow]);
         }
@@ -404,5 +378,33 @@ public sealed class MyNeuralNetwork
         }
 
         return scaledData;
+    }
+
+    private async Task<double> CalculateMape(double[][] data, IScalingMethod? scalingMethod, CancellationToken? cancellationToken)
+    {
+        var y = new double[data.Length];
+        var z = new double[data.Length];
+        var e = 0.0;
+        for (var pattern = 0; pattern < data.Length; pattern++)
+        {
+            await InitXi(data, pattern, cancellationToken);
+            await FeedForward(cancellationToken);
+
+            if (scalingMethod != null)
+            {
+                y[pattern] = (await scalingMethod.Descale(new [] { Xi[^1][0] }, cancellationToken))[0];
+                z[pattern] = (await scalingMethod.Descale(new [] { data[pattern][^1] }, cancellationToken))[0];
+            }
+            else
+            {
+                y[pattern] = Xi[^1][0];
+                z[pattern] = data[pattern][^1];
+            }
+                
+            e += Math.Abs((y[pattern] - z[pattern])/z[pattern]);
+        }
+
+        var mape = 100 * e / data.Length;
+        return mape;
     }
 }

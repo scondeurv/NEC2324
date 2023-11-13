@@ -42,6 +42,19 @@ try
     var factory = new ScalingMethodFactory();
     var scalingPerFeature = factory.CreatePerFeature(parameters.ScalingConfiguration);
     await nn.Fit(parameters.LearningRate, parameters.Momentum, scalingPerFeature, cancellationTokenSource.Token);
+    var errors = nn.LossEpochs();
+    var plotExporter = new PlotExporter();
+    var filename = Path.GetFileNameWithoutExtension(parameters.DataFile);
+    plotExporter.ExportLinear(
+        $"Error vs Epoch (\u03B7: {parameters.LearningRate:F4}, \u03B1: {parameters.Momentum:F4})",
+        "Epoch",
+        "MAPE",
+        new Dictionary<string, (double X, double Y)[]>
+        {
+            { "Training", errors.TrainingErrors.Select((e, epoch) => ((double)epoch, e) ).ToArray() },
+            { "Validation", errors.ValidationErrors.Select((e, epoch) => ((double)epoch, e) ).ToArray() }
+        },
+        $"{filename}-error-{DateTime.Now:yyyyMMddhhmmss}");
 }
 catch
 {
