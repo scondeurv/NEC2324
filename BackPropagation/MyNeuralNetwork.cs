@@ -22,9 +22,6 @@ public sealed class MyNeuralNetwork
     private double[][] D_Theta { get; } //Threshold changes
     private double[][,] D_W_Prev { get; } //Weight previous changes
     private double[][] D_Theta_Prev { get; } //Threshold previous changes
-    private double[] Y { get; set; } //Predictions
-    private double[] Z { get; set; } //Expected values
-    private double E { get; set; } //Quadratic error
     private IActivationFunction Fact { get; }
     private int Epochs { get; }
     private double ValidationPercentage { get; }
@@ -63,9 +60,6 @@ public sealed class MyNeuralNetwork
                 D_W_Prev[layer] = new double[N[layer], N[layer - 1]];
             }
         }
-
-        Y = new double[data.Length];
-        Z = new double[data.Length];
 
         var factory = new ActivationFunctionFactory();
         Fact = factory.Create(fact);
@@ -111,9 +105,9 @@ public sealed class MyNeuralNetwork
                     UpdateThresholds(learningRate, momentum, cancellationToken));
             }
 
-            Y = new double[data.Length];
-            Z = new double[data.Length];
-            E = 0;
+            var trainingY = new double[datasets.TrainingSet.Length];
+            var trainingZ = new double[datasets.TrainingSet.Length];
+            var trainingE = 0.0;
             for (var pattern = 0; pattern < datasets.TrainingSet.Length; pattern++)
             {
                 await InitXi(datasets.TrainingSet, pattern, cancellationToken);
@@ -121,19 +115,19 @@ public sealed class MyNeuralNetwork
 
                 if (scalingPerFeature.TryGetValue(Features[^1], out var outputScalingMethod))
                 {
-                    Y[pattern] = (await outputScalingMethod.Descale(new [] { Xi[^1][0] }, cancellationToken))[0];
-                    Z[pattern] = (await outputScalingMethod.Descale(new [] { datasets.TrainingSet[pattern][^1] }, cancellationToken))[0];
+                    trainingY[pattern] = (await outputScalingMethod.Descale(new [] { Xi[^1][0] }, cancellationToken))[0];
+                    trainingZ[pattern] = (await outputScalingMethod.Descale(new [] { datasets.TrainingSet[pattern][^1] }, cancellationToken))[0];
                 }
                 else
                 {
-                    Y[pattern] = Xi[^1][0];
-                    Z[pattern] = datasets.TrainingSet[pattern][^1];
+                    trainingY[pattern] = Xi[^1][0];
+                    trainingZ[pattern] = datasets.TrainingSet[pattern][^1];
                 }
                 
-                E += Math.Abs((Y[pattern] - Z[pattern])/Z[pattern]);
+                trainingE += Math.Abs((trainingY[pattern] - trainingZ[pattern])/trainingZ[pattern]);
             }
 
-            var trainingError = 100 * E / datasets.TrainingSet.Length;
+            var trainingError = 100 * trainingE / datasets.TrainingSet.Length;
             plotData.Add((epoch, trainingError));
             Logger.LogInformation($"Training error: {trainingError}");
         }
@@ -149,9 +143,9 @@ public sealed class MyNeuralNetwork
             },
             $"MapeVsEpoch-{DateTime.Now:yyyyMMddhhmmss}");
         
-        Y = new double[data.Length];
-        Z = new double[data.Length];
-        E = 0;
+        var validationY = new double[datasets.ValidationSet.Length];
+        var validationZ = new double[datasets.ValidationSet.Length];
+        var validationE = 0.0;
         var scatterData = new List<(double, double)>(datasets.ValidationSet.Length);
         for (var pattern = 0; pattern < datasets.ValidationSet.Length; pattern++)
         {
@@ -160,17 +154,17 @@ public sealed class MyNeuralNetwork
             
             if (scalingPerFeature.TryGetValue(Features[^1], out var outputScalingMethod))
             {
-                Y[pattern] = (await outputScalingMethod.Descale(new [] { Xi[^1][0] }, cancellationToken))[0];
-                Z[pattern] = (await outputScalingMethod.Descale(new [] { datasets.ValidationSet[pattern][^1] }, cancellationToken))[0];
+                validationY[pattern] = (await outputScalingMethod.Descale(new [] { Xi[^1][0] }, cancellationToken))[0];
+                validationZ[pattern] = (await outputScalingMethod.Descale(new [] { datasets.ValidationSet[pattern][^1] }, cancellationToken))[0];
             }
             else
             {
-                Y[pattern] = Xi[^1][0];
-                Z[pattern] = datasets.ValidationSet[pattern][^1];
+                validationY[pattern] = Xi[^1][0];
+                validationZ[pattern] = datasets.ValidationSet[pattern][^1];
             }
             
-            scatterData.Add((Y[pattern], Z[pattern]));
-            E += Math.Abs((Y[pattern] - Z[pattern])/Z[pattern]);
+            scatterData.Add((validationY[pattern], validationZ[pattern]));
+            validationE += Math.Abs((validationY[pattern] - validationZ[pattern])/validationZ[pattern]);
         }
         plotExporter.ExportScatter(
             $"Actual Vs Prediction (\u03B7: {learningRate:F4}, \u03B1: {momentum:F4})", 
@@ -178,7 +172,7 @@ public sealed class MyNeuralNetwork
             "Actual",
             scatterData.ToArray(),
             $"ActualVsPrediction-{DateTime.Now:yyyyMMddhhmmss}");
-        var validationError = 100 * E / datasets.ValidationSet.Length;
+        var validationError = 100 * validationE / datasets.ValidationSet.Length;
 
         Logger.LogInformation($"Validation error: {validationError}");
     }

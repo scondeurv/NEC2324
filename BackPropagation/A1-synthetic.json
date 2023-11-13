@@ -2,10 +2,10 @@
    "dataFile": "A1-synthetic.txt",
    "validationPercentage": 0.2,
    "layers": 5,
-   "unitsPerLayer":  [9, 13, 7, 5, 1],
-   "epochs": 9000,
-   "learningRate": 0.001,
-   "momentum": 0.9,
+   "unitsPerLayer":  [9, 13, 7, 3, 1],
+   "epochs": 2000,
+   "learningRate": 0.1,
+   "momentum": 0.2,
    "scalingConfiguration" : {
       "#v1" : {
          "method" : "zscore"

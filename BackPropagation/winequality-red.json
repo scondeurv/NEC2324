@@ -1,11 +1,11 @@
 ﻿{
    "dataFile": "winequality-red.csv",
    "validationPercentage": 0.2,
-   "layers": 5,
-   "unitsPerLayer": [11, 9, 7, 3, 1],
-   "epochs": 300,
+   "layers": 6,
+   "unitsPerLayer": [11, 9, 7, 5, 3, 1],
+   "epochs": 2500,
    "learningRate": 0.001,
-   "momentum": 0.9,
+   "momentum": 0.6,
    "scalingConfiguration" : {
       "fixed acidity": {
          "method" : "minmax",
