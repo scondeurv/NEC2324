@@ -61,7 +61,7 @@ try
     plotExporter.ExportLinear(
         $"Error vs Epoch (\u03B7: {parameters.LearningRate:F4}, \u03B1: {parameters.Momentum:F4})",
         "Epoch",
-        "MSE",
+        "Error",
         new Dictionary<string, (double X, double Y)[]>
         {
             { "Training", errors.TrainingErrors.Select((e, epoch) => ((double)epoch, e)).ToArray() },

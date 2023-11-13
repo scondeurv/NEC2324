@@ -6,6 +6,8 @@ namespace BackPropagation;
 
 public sealed class MyNeuralNetwork
 {
+    private const string MseError = "MSE";
+    private const string MapeError = "MAPE";
     private ILogger Logger { get; }
     private IActivationFunction Fact { get; }
     private int Epochs { get; }
@@ -71,9 +73,9 @@ public sealed class MyNeuralNetwork
                     UpdateThresholds(LearningRate, Momentum, cancellationToken));
             }
             
-            TrainingErrors[epoch] = await CalculateError(datasets.TrainingSet, cancellationToken);
+            TrainingErrors[epoch] = await CalculateError(datasets.TrainingSet, MapeError, cancellationToken);
             ValidationErrors[epoch] =
-                await CalculateError(datasets.ValidationSet, cancellationToken);
+                await CalculateError(datasets.ValidationSet, MapeError, cancellationToken);
         }
         
         Logger.LogInformation("Training ended");
@@ -314,7 +316,7 @@ public sealed class MyNeuralNetwork
         return Task.CompletedTask;
     }
 
-    private async Task<double> CalculateError(double[][] data, CancellationToken? cancellationToken)
+    private async Task<double> CalculateError(double[][] data, string errorType, CancellationToken? cancellationToken)
     {
         var y = new double[data.Length];
         var z = new double[data.Length];
@@ -327,10 +329,10 @@ public sealed class MyNeuralNetwork
             y[pattern] = Xi[^1][0];
             z[pattern] = data[pattern][^1];
 
-            e += Math.Pow((y[pattern] - z[pattern]), 2);
+            e += errorType == MseError ? Math.Pow((y[pattern] - z[pattern]), 2) : Math.Abs((y[pattern] - z[pattern])/ z[pattern]) ;
         }
 
-        var mse = 0.5 * e;
+        var mse = (errorType == MseError ? 0.5 : 100.00/data.Length) * e;
         return mse;
     }
 }
