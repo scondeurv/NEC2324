@@ -3,7 +3,7 @@
    "validationPercentage": 0.2,
    "layers": 5,
    "unitsPerLayer":  [4, 9, 5, 3, 1],
-   "epochs": 500,
+   "epochs": 40,
    "learningRate": 0.1,
    "momentum": 0.8,
    "scalingConfiguration" : {

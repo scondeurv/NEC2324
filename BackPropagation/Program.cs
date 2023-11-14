@@ -49,6 +49,8 @@ try
         logger.LogInformation("Scaling data...");
         var scaler = new DataScaler();
         data = await scaler.Scale(dataFile.Data, dataFile.Features, scalingPerFeature, cancellationTokenSource.Token);
+        var scaledDataFile = new DataFile(dataFile.Features, data);
+        await scaledDataFile.Save($"{Path.GetFileNameWithoutExtension(parameters.DataFile)}-scaled.txt");
     }
         
     await nn.Fit(data, dataFile.Features, cancellationTokenSource.Token);
