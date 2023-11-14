@@ -1,5 +1,5 @@
 ﻿{
-   "dataFile": "A1-turbine.txt",
+   "dataFile": "Datasets/A1-turbine.txt",
    "validationPercentage": 0.2,
    "layers": 5,
    "unitsPerLayer":  [4, 9, 5, 3, 1],

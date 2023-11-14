@@ -42,7 +42,6 @@ public sealed class MyNeuralNetwork
 
         var factory = new ActivationFunctionFactory();
         Fact = factory.Create(fact);
-        
     }
 
     public async Task Fit(double[][] data, string[] features, CancellationToken? cancellationToken = null)
@@ -52,14 +51,14 @@ public sealed class MyNeuralNetwork
         await Task.WhenAll(
             InitializeWeights((0, 1), cancellationToken),
             InitializeThresholds((0, 1), cancellationToken));
-        
+
         var datasets = await SplitDataSet(data, ValidationPercentage, cancellationToken);
 
         Logger.LogInformation("Training...");
         for (var epoch = 0; epoch < Epochs; epoch++)
         {
             cancellationToken?.ThrowIfCancellationRequested();
-            
+
             Logger.LogInformation($"Epoch {epoch + 1}");
             var rand = new Random();
             foreach (var t in datasets.TrainingSet)
@@ -72,12 +71,12 @@ public sealed class MyNeuralNetwork
                     UpdateWeights(LearningRate, Momentum, cancellationToken),
                     UpdateThresholds(LearningRate, Momentum, cancellationToken));
             }
-            
-            TrainingErrors[epoch] = await CalculateError(datasets.TrainingSet, MapeError, cancellationToken);
+
+            TrainingErrors[epoch] = await CalculateError(datasets.TrainingSet, MseError, cancellationToken);
             ValidationErrors[epoch] =
-                await CalculateError(datasets.ValidationSet, MapeError, cancellationToken);
+                await CalculateError(datasets.ValidationSet, MseError, cancellationToken);
         }
-        
+
         Logger.LogInformation("Training ended");
     }
 
@@ -318,21 +317,19 @@ public sealed class MyNeuralNetwork
 
     private async Task<double> CalculateError(double[][] data, string errorType, CancellationToken? cancellationToken)
     {
-        var y = new double[data.Length];
-        var z = new double[data.Length];
-        var e = 0.0;
-        for (var pattern = 0; pattern < data.Length; pattern++)
+        var predictions = await Predict(data, cancellationToken);
+        
+        var sum = 0.0;
+        for (var i = 0; i < data.Length; i++)
         {
-            await InitXi(data, pattern, cancellationToken);
-            await FeedForward(cancellationToken);
-
-            y[pattern] = Xi[^1][0];
-            z[pattern] = data[pattern][^1];
-
-            e += errorType == MseError ? Math.Pow((y[pattern] - z[pattern]), 2) : Math.Abs((y[pattern] - z[pattern])/ z[pattern]) ;
+            cancellationToken?.ThrowIfCancellationRequested();
+            var z = data[i][^1];
+            var y = predictions[i];
+            var e = errorType == MseError ? Math.Pow(y - z, 2) : Math.Abs(z - y);
+            sum += e;
         }
-
-        var mse = (errorType == MseError ? 0.5 : 100.00/data.Length) * e;
-        return mse;
+        
+        var error = (errorType == MseError ? 0.5 : 100.00/data.Length)  * sum;
+        return error;
     }
 }

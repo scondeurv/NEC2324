@@ -1,5 +1,5 @@
 ﻿{
-   "dataFile": "A1-synthetic.txt",
+   "dataFile": "Datasets/A1-synthetic.txt",
    "validationPercentage": 0.2,
    "layers": 4,
    "unitsPerLayer":  [9, 5, 3, 1],
