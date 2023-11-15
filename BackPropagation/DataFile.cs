@@ -50,7 +50,7 @@ public class DataFile
             else
             {
                 var result = regex.Split(line);
-                loadedData.Add(result.Select(d => double.Parse(d, CultureInfo.InvariantCulture)).ToArray());
+                loadedData.Add(result.Select(d => double.Parse(d, NumberStyles.Float, CultureInfo.InvariantCulture)).ToArray());
             }
         }
 

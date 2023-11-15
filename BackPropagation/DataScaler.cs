@@ -12,13 +12,12 @@ public class DataScaler
         var featuresToScale = scalingMethodPerFeature.Keys.ToList();
         var scalingTasks = new List<Task<double[]>>();
         var featureIndexes = new List<int>();
-        foreach (var feature in features)
+        foreach (var (feature, col) in features.Select((f, i) => (f, i)))
         {
             cancellationToken?.ThrowIfCancellationRequested();
 
             if (featuresToScale.Contains(feature))
             {
-                var col = featuresToScale.IndexOf(feature);
                 featureIndexes.Add(col);
                 var featureData = new double[data.Length];
                 for (var row = 0; row < data.Length; row++)
@@ -29,10 +28,6 @@ public class DataScaler
                 var scalingMethod = scalingMethodPerFeature[feature];
                 scalingTasks.Add(scalingMethod.Scale(featureData, cancellationToken));
             }
-            else
-            {
-                throw new FeatureNotFoundException(feature);
-            }
         }
 
         var results = await Task.WhenAll(scalingTasks);
@@ -40,12 +35,12 @@ public class DataScaler
         for (var row = 0; row < data.Length; row++)
         {
             scaledData[row] = new double[data[0].Length];
-
+            
             for (var col = 0; col < data[0].Length; col++)
             {
                 if (featureIndexes.Contains(col))
                 {
-                    scaledData[row][col] = results[col][row];
+                    scaledData[row][col] = results[featureIndexes.IndexOf(col)][row];
                 }
                 else
                 {

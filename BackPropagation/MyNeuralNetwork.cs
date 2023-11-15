@@ -72,9 +72,9 @@ public sealed class MyNeuralNetwork
                     UpdateThresholds(LearningRate, Momentum, cancellationToken));
             }
 
-            TrainingErrors[epoch] = await CalculateError(datasets.TrainingSet, MseError, cancellationToken);
+            TrainingErrors[epoch] = await CalculateError(datasets.TrainingSet, MapeError, cancellationToken);
             ValidationErrors[epoch] =
-                await CalculateError(datasets.ValidationSet, MseError, cancellationToken);
+                await CalculateError(datasets.ValidationSet, MapeError, cancellationToken);
         }
 
         Logger.LogInformation("Training ended");
