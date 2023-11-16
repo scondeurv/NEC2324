@@ -1,0 +1,45 @@
+﻿{
+   "trainingFile": "Datasets/A1-synthetic.training.txt",
+   "testFile": "Datasets/A1-synthetic.test.txt",
+   "validationPercentage": 0.1,
+   "layers": 4,
+   "unitsPerLayer":  [9, 15, 7, 1],
+   "activationFunctionPerLayer": ["sigmoid", "sigmoid", "sigmoid", "sigmoid"],
+   "epochs": 140,
+   "batchSize": 1000,
+   "learningRate": 0.00001,
+   "momentum": 0.9,
+   "scalingConfiguration" : {
+//      "#v1" : {
+//         "method" : "zscore"
+//      },
+//      "v2" : {
+//         "method" : "zscore"
+//      },
+//      "v3" : {
+//         "method" : "zscore"
+//      },
+//      "v4" : {
+//         "method" : "minmax",
+//         "rangeMin" : "0.0001",
+//         "rangeMax" : "1.0"
+//      },
+//      "v5" : {
+//         "method" : "zscore"
+//      },
+//      "v6" : {
+//         "method" : "zscore"
+//      },
+//      "v7" : {
+//         "method" : "zscore"
+//      },
+//      "v9" : {
+//         "method" : "minmax",
+//         "rangeMin" : "0.0001",
+//         "rangeMax" : "1.0"
+//      },
+//      "z" : {
+//         "method" : "zscore"
+//      }
+   }
+}

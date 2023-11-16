@@ -1,0 +1,78 @@
+﻿{
+   "trainingFile": "Datasets/electricity_load_forecasting.csv",
+   "validationPercentage": 0.8,
+   "layers": 4,
+   "unitsPerLayer":  [17, 11, 7, 1],
+   "activationFunctionPerLayer": ["sigmoid", "sigmoid", "sigmoid", "sigmoid"],
+   "epochs": 10,
+   "batchSize": 48048,
+   "learningRate": 0.01,
+   "momentum": 0.8,
+   "scalingConfiguration" : {
+      "T2M_toc" : {
+         "method" : "minmax",
+         "rangeMin" : 0.0001,
+         "rangeMax" : 1.0
+      },
+      "QV2M_toc" : {
+         "method" : "minmax",
+         "rangeMin" : 0.0001,
+         "rangeMax" : 1.0
+      },
+      "TQL_toc" : {
+         "method" : "minmax",
+         "rangeMin" : 0.0001,
+         "rangeMax" : 1.0
+      },
+      "W2M_toc" : {
+         "method" : "minmax",
+         "rangeMin" : 0.0001,
+         "rangeMax" : 1.0
+      },
+      "T2M_san" : {
+         "method" : "minmax",
+         "rangeMin" : 0.0001,
+         "rangeMax" : 1.0
+      },
+      "QV2M_san" : {
+         "method" : "minmax",
+         "rangeMin" : 0.0001,
+         "rangeMax" : 1.0
+      },
+      "TQL_san" : {
+         "method" : "minmax",
+         "rangeMin" : 0.0001,
+         "rangeMax" : 1.0
+      },
+      "W2M_san" : {
+         "method" : "minmax",
+         "rangeMin" : 0.0001,
+         "rangeMax" : 1.0
+      },
+      "T2M_dav" : {
+         "method" : "minmax",
+         "rangeMin" : 0.0001,
+         "rangeMax" : 1.0
+      },
+      "QV2M_dav" : {
+         "method" : "minmax",
+         "rangeMin" : 0.0001,
+         "rangeMax" : 1.0
+      },
+      "TQL_dav" : {
+         "method" : "minmax",
+         "rangeMin" : 0.0001,
+         "rangeMax" : 1.0
+      },
+      "W2M_dav" : {
+         "method" : "minmax",
+         "rangeMin" : 0.0001,
+         "rangeMax" : 1.0
+      },
+      "nat_demand" : {
+         "method" : "minmax",
+         "rangeMin" : 0.0001,
+         "rangeMax" : 1.0
+      }
+   }
+}

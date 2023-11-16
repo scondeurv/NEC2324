@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BackPropagation", "BackPropagation.csproj", "{88410532-6DC9-4CDD-ABF4-CDC97C1FD34E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BackPropagation", "BackPropagation\BackPropagation.csproj", "{88410532-6DC9-4CDD-ABF4-CDC97C1FD34E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BackPropagation.UnitTests", "BackPropagation.UnitTests\BackPropagation.UnitTests.csproj", "{ACECE84B-D9CC-4B55-9138-9BEAAE6A8CFC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -12,5 +14,9 @@ Global
 		{88410532-6DC9-4CDD-ABF4-CDC97C1FD34E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{88410532-6DC9-4CDD-ABF4-CDC97C1FD34E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{88410532-6DC9-4CDD-ABF4-CDC97C1FD34E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ACECE84B-D9CC-4B55-9138-9BEAAE6A8CFC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ACECE84B-D9CC-4B55-9138-9BEAAE6A8CFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ACECE84B-D9CC-4B55-9138-9BEAAE6A8CFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ACECE84B-D9CC-4B55-9138-9BEAAE6A8CFC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
