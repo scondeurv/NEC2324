@@ -25,7 +25,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\BackPropagation.csproj" />
       <ProjectReference Include="..\BackPropagation\BackPropagation.csproj" />
     </ItemGroup>
 
