@@ -6,7 +6,6 @@ namespace BackPropagation;
 
 public sealed class MyNeuralNetwork
 {
-    private const int DefaultBatchSize = 100;
     private ILogger Logger { get; }
     private IActivationFunction[] Facts { get; }
     private int Epochs { get; }
@@ -29,7 +28,7 @@ public sealed class MyNeuralNetwork
     private (double Mse, double Mape)[] ValidationErrors { get; set; }
 
     public MyNeuralNetwork(ILogger logger, int[] unitsPerLayer,
-        ActivationFunctionType[] facts, int epochs, int? batchSize, double validationPercentage,
+        ActivationFunctionType[] facts, int epochs, double validationPercentage,
         double learningRate, double momentum)
     {
         Logger = logger;
@@ -37,7 +36,6 @@ public sealed class MyNeuralNetwork
         L = unitsPerLayer.Length;
         N = unitsPerLayer;
         Epochs = epochs;
-        BatchSize = batchSize ?? DefaultBatchSize;
         ValidationPercentage = validationPercentage;
         LearningRate = learningRate;
         Momentum = momentum;
@@ -62,29 +60,19 @@ public sealed class MyNeuralNetwork
             cancellationToken?.ThrowIfCancellationRequested();
 
             Logger.LogInformation($"Epoch {epoch + 1}...");
-            var rand = new Random();
-            var batches = (int)Math.Ceiling(datasets.TrainingSet.Length / (double)BatchSize);
-            for (var batch = 0; batch < batches; batch++)
-            {
-                var batchStart = batch * BatchSize;
-                var batchEnd = batchStart + BatchSize;
-                if (batchEnd > datasets.TrainingSet.Length)
-                {
-                    batchEnd = datasets.TrainingSet.Length;
-                }
-                var trainingBatch = datasets.TrainingSet[batchStart..batchEnd];
 
-                foreach (var t in trainingBatch)
-                {
-                    var pattern = rand.Next(0, trainingBatch.Length);
-                    await InitXi(datasets.TrainingSet, pattern, cancellationToken);
-                    await FeedForward(cancellationToken);
-                    await BackPropagation(y: Xi[^1][0], z: datasets.TrainingSet[pattern][^1], cancellationToken);
-                    await Task.WhenAll(
-                        UpdateWeights(LearningRate, Momentum, cancellationToken),
-                        UpdateThresholds(LearningRate, Momentum, cancellationToken));
-                }
+            var rand = new Random();
+            foreach (var t in datasets.TrainingSet)
+            {
+                var pattern = rand.Next(0, datasets.TrainingSet.Length);
+                await InitXi(datasets.TrainingSet, pattern, cancellationToken);
+                await FeedForward(cancellationToken);
+                await BackPropagation(y: Xi[^1][0], z: datasets.TrainingSet[pattern][^1], cancellationToken);
+                await Task.WhenAll(
+                    UpdateWeights(LearningRate, Momentum, cancellationToken),
+                    UpdateThresholds(LearningRate, Momentum, cancellationToken));
             }
+
             Logger.LogInformation($"Epoch {epoch + 1}");
             TrainingErrors[epoch] = await CalculateErrors(datasets.TrainingSet, cancellationToken);
             ValidationErrors[epoch] =
@@ -94,7 +82,8 @@ public sealed class MyNeuralNetwork
         Logger.LogInformation("Training ended");
     }
 
-    public ((double Mse, double Mape)[] TrainingErrors, (double Mse, double Mape)[] ValidationErrors) LossEpochs() => (TrainingErrors, ValidationErrors);
+    public ((double Mse, double Mape)[] TrainingErrors, (double Mse, double Mape)[] ValidationErrors) LossEpochs() =>
+        (TrainingErrors, ValidationErrors);
 
     public async Task<double[]> Predict(double[][] data, CancellationToken? cancellationToken = null)
     {
@@ -330,7 +319,7 @@ public sealed class MyNeuralNetwork
     private async Task<(double Mse, double Mape)> CalculateErrors(double[][] data, CancellationToken? cancellationToken)
     {
         var predictions = await Predict(data, cancellationToken);
-        
+
         var sumMape = 0.0;
         var sumMse = 0.0;
         for (var i = 0; i < data.Length; i++)
@@ -339,7 +328,7 @@ public sealed class MyNeuralNetwork
             var z = data[i][^1];
             var y = predictions[i];
             sumMse += Math.Pow(y - z, 2);
-            sumMape += Math.Abs(z - y);
+            sumMape += Math.Abs((z - y) / z);
         }
 
         var mse = 0.5 * sumMse / data.Length;

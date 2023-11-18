@@ -13,9 +13,6 @@ public class NeuralNetworksParameterValidator : AbstractValidator<NeuralNetworkP
         RuleFor(tp => tp.Epochs)
             .GreaterThan(0);
         
-        RuleFor(tp => tp.BatchSize)
-            .Must(bs => bs is null or > 0);
-        
         RuleFor(tp => tp.Layers)
             .GreaterThan(0);
 

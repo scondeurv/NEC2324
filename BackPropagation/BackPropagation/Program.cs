@@ -45,7 +45,7 @@ var cancellationTokenSource = new CancellationTokenSource();
 try
 {
     var nn = new MyNeuralNetwork(logger, parameters.UnitsPerLayer,
-        parameters.ActivationFunctionPerLayer, parameters.Epochs, parameters.BatchSize, parameters.ValidationPercentage, parameters.LearningRate,
+        parameters.ActivationFunctionPerLayer, parameters.Epochs, parameters.ValidationPercentage, parameters.LearningRate,
         parameters.Momentum);
     
     var factory = new ScalingMethodFactory();
@@ -58,14 +58,14 @@ try
         var scaler = new DataScaler();
         trainingData = await scaler.Scale(trainingFile.Data, trainingFile.Features, scalingPerFeature, cancellationTokenSource.Token);
         var scaledTrainingDataFile = new DataFile(trainingFile.Features, trainingData);
-        await scaledTrainingDataFile.Save($"{Path.GetFileNameWithoutExtension(parameters.TrainingFile)}.training.txt");
+        await scaledTrainingDataFile.Save($"{Path.GetFileNameWithoutExtension(parameters.TrainingFile)}.scaled.txt");
 
         if (testData != null)
         {
             testData = await scaler.Scale(testFile.Data, testFile.Features, scalingPerFeature,
                 cancellationTokenSource.Token);
             var scaledTestDataFile = new DataFile(testFile.Features, testData);
-            await scaledTestDataFile.Save($"{Path.GetFileNameWithoutExtension(parameters.TestFile)}.test.txt");
+            await scaledTestDataFile.Save($"{Path.GetFileNameWithoutExtension(parameters.TestFile)}.scaled.txt");
         }
     }
         

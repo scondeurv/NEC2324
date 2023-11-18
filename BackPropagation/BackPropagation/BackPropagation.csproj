@@ -49,8 +49,16 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Content Include="..\..\datasets\A1-synthetic.test.scaled.txt">
+        <Link>Datasets\A1-synthetic.test.scaled.txt</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
       <Content Include="..\..\datasets\A1-synthetic.test.txt">
         <Link>Datasets\A1-synthetic.test.txt</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="..\..\datasets\A1-synthetic.training.scaled.txt">
+        <Link>Datasets\A1-synthetic.training.scaled.txt</Link>
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
       <Content Include="..\..\datasets\A1-synthetic.training.txt">
@@ -61,8 +69,16 @@
         <Link>Datasets\A1-synthetic.txt</Link>
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
+      <Content Include="..\..\datasets\A1-turbine.test.scaled.txt">
+        <Link>Datasets\A1-turbine.test.scaled.txt</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
       <Content Include="..\..\datasets\A1-turbine.test.txt">
         <Link>Datasets\A1-turbine.test.txt</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="..\..\datasets\A1-turbine.training.scaled.txt">
+        <Link>Datasets\A1-turbine.training.scaled.txt</Link>
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
       <Content Include="..\..\datasets\A1-turbine.training.txt">
@@ -77,8 +93,16 @@
         <Link>Datasets\market_data.csv</Link>
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
+      <Content Include="..\..\datasets\market_data.test.scaled.txt">
+        <Link>Datasets\market_data.test.scaled.txt</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
       <Content Include="..\..\datasets\market_data.test.txt">
         <Link>Datasets\market_data.test.txt</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="..\..\datasets\market_data.training.scaled.txt">
+        <Link>Datasets\market_data.training.scaled.txt</Link>
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
       <Content Include="..\..\datasets\market_data.training.txt">
