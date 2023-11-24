@@ -12,6 +12,7 @@ await Parser.Default.ParseArguments<Options>(args)
     {
         var dataset = await ReadFile(opt.InputFile, opt.Delimiter, opt.NoHeader);
         var histogramSeries = CreateHistogramSeries(dataset);
+        var lineSeries = await CreateLineSeries(dataset);
         foreach (var item in histogramSeries)
         {
             var plotModel = new PlotModel
@@ -20,41 +21,68 @@ await Parser.Default.ParseArguments<Options>(args)
                 Background = OxyColors.White,
             };
             
-            plotModel.Axes.Add(new LinearAxis { Position = AxisPosition.Bottom, Title = "Value" });
-            plotModel.Axes.Add(new LinearAxis { Position = AxisPosition.Left, Title = "Count"});
             plotModel.Series.Add(item.Value);
+            plotModel.Series.Add(lineSeries[item.Key]);
             PngExporter.Export(plotModel, $"{item.Key}.png", 600, 400);
         }
     });
 
-IReadOnlyDictionary<string, HistogramSeries> CreateHistogramSeries(IReadOnlyDictionary<string, double[]> dataset)
+IReadOnlyDictionary<string, HistogramSeries> CreateHistogramSeries(IReadOnlyDictionary<string, double[]> dataset, double binSize = 0.01)
 {
     var histogramSeries = new Dictionary<string, HistogramSeries>(dataset.Keys.Count());
     foreach (var feature in dataset.Keys)
     {
         var series = new HistogramSeries();
         var values = dataset[feature];
-        var mean = CalculateMean(values);
-        var stdDev = CalculateStandardDeviation(mean, values);
         var min = values.Min();
         var max = values.Max();
         var range = max - min;
-        var binAmount = range / stdDev;
-        var binSize = stdDev;
+        var binAmount = (range / binSize) + (range % binSize > 0 ? 1 : 0);
 
         for (var i = 0; i < binAmount; i++)
         {
             var binStart = min + (i * binSize) ;
             var binEnd = min + ((i+1) * binSize);
             var count = values.Count(v => v >= binStart && v < binEnd);
-            var bin = new HistogramItem(binStart, binEnd, 1, count);
+            var bin = new HistogramItem(binStart, binEnd, binSize * count, 1);
             series.Items.Add(bin);
         }
 
+        series.FillColor = OxyColors.Blue;
         histogramSeries.Add(feature, series);
     }
 
     return histogramSeries;
+}
+
+static IReadOnlyDictionary<string, LineSeries> CreateLineSeries(IReadOnlyDictionary<string, double[]> dataset)
+{
+    var lineSeries = new Dictionary<string, LineSeries>();
+    foreach (var item in dataset)
+    {
+        var values = item.Value;
+        var min = values.Min();
+        var max = values.Max();
+        var binSize = (max - min) / 100;
+        var mean = values.Average();
+        var stdDev = Math.Sqrt(values.Sum(v => Math.Pow(v - mean, 2)) / values.Length);
+        var line = new double[100];
+        for (var x = min; x <= max; x += binSize)
+        {
+            line[(int)((x - min) / binSize)] = NormalDistribution(x, mean, stdDev);
+        }
+
+        lineSeries.Add(item.Key, line);
+    }
+
+    return lineSeries;
+}
+
+static double NormalDistribution(double x, double mean, double stdDev)
+{
+    var factor = 1.0 / Math.Sqrt(2 * Math.PI * stdDev * stdDev);
+    var exponent = -(x - mean) * (x - mean) / (2 * stdDev * stdDev);
+    return factor * Math.Exp(exponent);
 }
 
 static async Task<IReadOnlyDictionary<string, double[]>> ReadFile(string fileName, string delimiter, bool noHeader)
@@ -97,20 +125,4 @@ static async Task<IReadOnlyDictionary<string, double[]>> ReadFile(string fileNam
     }
 
     return table.ToDictionary(t => t.Key, t => t.Value.ToArray());
-}
-
-static double CalculateMean(double[] data)
-{
-    var acc = data.Sum();
-
-    var mean = acc / data.Length;
-    return mean;
-}
-
-static double CalculateStandardDeviation(double mean, double[] data)
-{
-    var acc = data.Sum(value => Math.Pow(value - mean, 2));
-
-    var standardDeviation = Math.Sqrt(acc / data.Length);
-    return standardDeviation;
 }
