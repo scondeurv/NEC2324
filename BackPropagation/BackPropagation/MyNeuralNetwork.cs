@@ -8,8 +8,8 @@ public sealed class MyNeuralNetwork
 {
     private ILogger Logger { get; }
     private IActivationFunction[] Facts { get; }
+    private string[] Features { get; set; }
     private int Epochs { get; }
-    private int BatchSize { get; }
     private double ValidationPercentage { get; }
     private int L { get; } //Number of layers
     private int[] N { get; } //Units per layer
@@ -47,6 +47,7 @@ public sealed class MyNeuralNetwork
     public async Task Fit(double[][] data, string[] features, CancellationToken? cancellationToken = null)
     {
         Logger.LogInformation("Initializing training...");
+        Features = features;
         Init();
         await Task.WhenAll(
             InitializeWeights((0, 1), cancellationToken),
