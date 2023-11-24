@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrawDist", "DrawDist\DrawDist.csproj", "{54535787-0B91-4DD8-A454-CD8EC8AD27B4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataCategorizer", "DataCategorizer\DataCategorizer.csproj", "{906A9684-8680-4EC4-9603-4B60DDCE72AE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{54535787-0B91-4DD8-A454-CD8EC8AD27B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54535787-0B91-4DD8-A454-CD8EC8AD27B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54535787-0B91-4DD8-A454-CD8EC8AD27B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54535787-0B91-4DD8-A454-CD8EC8AD27B4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{906A9684-8680-4EC4-9603-4B60DDCE72AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{906A9684-8680-4EC4-9603-4B60DDCE72AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{906A9684-8680-4EC4-9603-4B60DDCE72AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{906A9684-8680-4EC4-9603-4B60DDCE72AE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
