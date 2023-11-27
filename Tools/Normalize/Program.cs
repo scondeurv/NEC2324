@@ -13,6 +13,6 @@ await Parser.Default.ParseArguments<Options>(args)
             .ToDictionary(opt => opt[0], opt => opt[1]));
         await dataset.Scale(scalingMethodPerFeature);
         var outputFileName =
-            $"¨{Path.GetFileNameWithoutExtension(opt.InputFile)}-scaled{Path.GetExtension(opt.InputFile)}";
-        await dataset.Save(outputFileName, opt.Delimiter);
+            $"{Path.GetFileNameWithoutExtension(opt.InputFile)}-scaled{Path.GetExtension(opt.InputFile)}";
+        await dataset.Save(outputFileName, opt.Delimiter, true);
     });

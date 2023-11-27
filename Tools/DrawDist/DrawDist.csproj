@@ -22,6 +22,14 @@
         <Link>Datasets\bank-additional-full.csv</Link>
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
+      <Content Include="..\..\datasets\A2-bank\bank-additional-full_categorized-scaled-minmax.csv">
+        <Link>Datasets\bank-additional-full_categorized-scaled-minmax.csv</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="..\..\datasets\A2-bank\bank-additional-full_categorized-scaled-zscore.csv">
+        <Link>Datasets\bank-additional-full_categorized-scaled-zscore.csv</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
       <Content Include="..\..\datasets\A2-bank\bank-additional-full_categorized.csv">
         <Link>Datasets\bank-additional-full_categorized.csv</Link>
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -32,6 +40,14 @@
       </Content>
       <Content Include="..\..\datasets\A2-bank\bank-additional.csv">
         <Link>Datasets\bank-additional.csv</Link>
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+      <Content Include="..\..\datasets\A2-bank\bank-additional_categorized.csv">
+        <Link>Datasets\bank-additional_categorized.csv</Link>
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+      <Content Include="..\..\datasets\A2-bank\bank-additional_mapping.csv">
+        <Link>Datasets\bank-additional_mapping.csv</Link>
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
       <Content Include="..\..\datasets\A2-ring\A2-ring-merged.txt">

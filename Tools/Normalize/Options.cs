@@ -4,7 +4,7 @@ namespace Tools.Normalize;
 
 public class Options
 {
-    [Option('i', "input", Required = true, HelpText = "Input file.")]
+    [Option('f', "input-file", Required = true, HelpText = "Input file.")]
     public required string InputFile { get; init; }
 
     [Option('d', "delimiter", Default = "\t", HelpText = "Delimiter.")]
