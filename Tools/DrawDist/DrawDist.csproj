@@ -5,6 +5,8 @@
         <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <AssemblyName>Tools.DrawDist</AssemblyName>
+        <RootNamespace>Tools.DrawDist</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

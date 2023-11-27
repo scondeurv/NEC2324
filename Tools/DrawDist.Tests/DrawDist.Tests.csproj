@@ -7,6 +7,8 @@
 
         <IsPackable>false</IsPackable>
         <IsTestProject>true</IsTestProject>
+        <AssemblyName>Tools.DrawDist.Tests</AssemblyName>
+        <RootNamespace>Tools.DrawDist.Tests</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

@@ -1,6 +1,7 @@
 using AutoFixture.Xunit2;
+using Tools.DrawDist;
 
-namespace DrawDist.Tests;
+namespace Tools.DrawDist.Tests;
 
 public class DatasetPlotExporterTests
 {

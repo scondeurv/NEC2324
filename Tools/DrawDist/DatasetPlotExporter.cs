@@ -6,7 +6,7 @@ using OxyPlot.Axes;
 using OxyPlot.Core.Drawing;
 using OxyPlot.Series;
 
-namespace DrawDist;
+namespace Tools.DrawDist;
 
 public sealed class DatasetPlotExporter
 {

@@ -1,6 +1,6 @@
 ﻿using CommandLine;
 
-namespace DrawDist;
+namespace Tools.DrawDist;
 
 public sealed class Options
 {
