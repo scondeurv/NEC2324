@@ -4,6 +4,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrawDist", "DrawDist\DrawDi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataCategorizer", "DataCategorizer\DataCategorizer.csproj", "{906A9684-8680-4EC4-9603-4B60DDCE72AE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrawDist.Tests", "DrawDist.Tests\DrawDist.Tests.csproj", "{9D9B87A6-DCB9-4106-ADA4-F6862CDA0898}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataNormalizer", "DataNormalizer\DataNormalizer.csproj", "{0517A203-4ABC-40AC-8B6C-4F16A00904FC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +22,13 @@ Global
 		{906A9684-8680-4EC4-9603-4B60DDCE72AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{906A9684-8680-4EC4-9603-4B60DDCE72AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{906A9684-8680-4EC4-9603-4B60DDCE72AE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D9B87A6-DCB9-4106-ADA4-F6862CDA0898}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D9B87A6-DCB9-4106-ADA4-F6862CDA0898}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D9B87A6-DCB9-4106-ADA4-F6862CDA0898}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D9B87A6-DCB9-4106-ADA4-F6862CDA0898}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0517A203-4ABC-40AC-8B6C-4F16A00904FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0517A203-4ABC-40AC-8B6C-4F16A00904FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0517A203-4ABC-40AC-8B6C-4F16A00904FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0517A203-4ABC-40AC-8B6C-4F16A00904FC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
