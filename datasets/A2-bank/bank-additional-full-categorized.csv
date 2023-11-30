@@ -1,4 +1,4 @@
-"age";"job";"marital";"education";"default";"housing";"loan";"contact";"month";"day_of_week";"duration";"campaign";"pdays";"previous";"poutcome";"emp.var.rate";"cons.price.idx";"cons.conf.idx";"euribor3m";"nr.employed";"y"
+age;job;marital;education;default;housing;loan;contact;month;day_of_week;duration;campaign;pdays;previous;poutcome;emp.var.rate;cons.price.idx;cons.conf.idx;euribor3m;nr.employed;y
 56;0;0;0;0;0;0;0;0;0;261;1;999;0;0;1.1;93.994;-36.4;4.857;5191;0
 57;1;0;1;1;0;0;0;0;0;149;1;999;0;0;1.1;93.994;-36.4;4.857;5191;0
 37;1;0;1;0;1;0;0;0;0;226;1;999;0;0;1.1;93.994;-36.4;4.857;5191;0

@@ -16,43 +16,4 @@
       <PackageReference Include="OxyPlot.ImageSharp" Version="2.1.2" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Content Include="..\..\datasets\A2-bank\bank-additional-full.csv">
-        <Link>Datasets\bank-additional-full.csv</Link>
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
-      <Content Include="..\..\datasets\A2-bank\bank-additional.csv">
-        <Link>Datasets\bank-additional.csv</Link>
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
-      <Content Include="..\..\datasets\A2-bank\bank-additional_categorized-scaled.csv">
-        <Link>Datasets\bank-additional_categorized-scaled.csv</Link>
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
-      <Content Include="..\..\datasets\A2-bank\bank-additional_categorized.csv">
-        <Link>Datasets\bank-additional_categorized.csv</Link>
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
-      <Content Include="..\..\datasets\A2-bank\bank-additional_mapping.csv">
-        <Link>Datasets\bank-additional_mapping.csv</Link>
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
-      <Content Include="..\..\datasets\A2-ring\A2-ring-merged.txt">
-        <Link>Datasets\A2-ring-merged.txt</Link>
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
-      <Content Include="..\..\datasets\A2-ring\A2-ring-separable.txt">
-        <Link>Datasets\A2-ring-separable.txt</Link>
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
-      <Content Include="..\..\datasets\A2-ring\A2-ring-test.txt">
-        <Link>Datasets\A2-ring-test.txt</Link>
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
-      <Content Include="..\..\datasets\mushrooms-categorized.csv">
-        <Link>Datasets\mushrooms-categorized.csv</Link>
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
-    </ItemGroup>
-
 </Project>

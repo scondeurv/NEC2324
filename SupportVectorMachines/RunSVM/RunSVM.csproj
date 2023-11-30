@@ -9,6 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="Accord.Extensions.Statistics" Version="3.0.1" />
       <PackageReference Include="Accord.Statistics" Version="3.8.0" />
       <PackageReference Include="CommandLineParser" Version="2.9.1" />
       <PackageReference Include="LibSVMsharp" Version="1.2.5" />

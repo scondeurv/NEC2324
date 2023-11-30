@@ -2,11 +2,6 @@
 using CommandLine;
 using LibSVMsharp;
 using LibSVMsharp.Extensions;
-using OxyPlot;
-using OxyPlot.Axes;
-using OxyPlot.Core.Drawing;
-using OxyPlot.Legends;
-using OxyPlot.Series;
 using SupportVectorMachines.RunSVM;
 using SupportVectorMachines.RunSVM.Extensions;
 using Tools.Common;
@@ -16,13 +11,13 @@ await Parser.Default.ParseArguments<Options>(args)
     {
         var dataset = new Dataset();
         await dataset.Load(opt.DatasetFile, opt.Delimiter, opt.NoHeader);
-        
+
         Dataset trainDataset = null;
         Dataset testDataset = null;
         if (opt.TestFile != null)
         {
+            trainDataset = dataset;
             testDataset = new Dataset();
-
             await testDataset.Load(opt.TestFile, opt.Delimiter, opt.NoHeader);
         }
         else
@@ -39,17 +34,34 @@ await Parser.Default.ParseArguments<Options>(args)
         {
             model = SVM.LoadModel(opt.ModelFile);
             (confusionMatrix, expected, predicted) = SVMRunner.Predict(model, dataset.ToSVMProblem());
+            var roc = new ReceiverOperatingCharacteristic(expected.Select(p => p > 0).ToArray(),
+                predicted);
+            roc.Compute(1000);
+            Console.WriteLine($"AUC: {roc.Area}");
+
             if (opt.ExportPlots)
             {
                 var features = (opt.PlotFeatures?.Split(':') ?? dataset.Data.Keys.Take(2)).ToArray();
                 dataset.Data.TryGetValue(features[0], out var featureX);
                 dataset.Data.TryGetValue(features[1], out var featureY);
+                
                 var fileName = $"{Path.GetFileNameWithoutExtension(opt.DatasetFile)}-expected.png";
-                ExportScatterPlot($"Actual {dataset.Data.Keys.Last()}", features, featureX, featureY, expected, fileName);
-                Console.WriteLine("Exported plot to {0}", fileName);
+                PlotExporter.ExportScatterPlot($"Actual {dataset.Data.Keys.Last()}", features, featureX, featureY,
+                    expected,
+                    fileName);
+                Console.WriteLine($"Exported plot to {fileName}");
+                
                 fileName = $"{Path.GetFileNameWithoutExtension(opt.DatasetFile)}-predicted.png";
-                ExportScatterPlot($"Predicted {dataset.Data.Keys.Last()}", features, featureX, featureY, predicted, fileName);
-                Console.WriteLine("Exported plot to {0}", fileName);
+                PlotExporter.ExportScatterPlot($"Predicted {dataset.Data.Keys.Last()}", features, featureX, featureY,
+                    predicted,
+                    fileName);
+                Console.WriteLine($"Exported plot to {fileName}");
+                
+                fileName = $"{Path.GetFileNameWithoutExtension(opt.DatasetFile)}-roc.png";
+                var points = roc.Points.Select(p =>
+                    (p.FalsePositiveRate, (double)p.TruePositives / (p.TruePositives + p.FalseNegatives)));
+                PlotExporter.ExportRoc(points, $"{Path.GetFileNameWithoutExtension(opt.DatasetFile)}-roc.png");
+                Console.WriteLine($"Exported ROC plot to {fileName}");
             }
         }
         else
@@ -85,7 +97,7 @@ await Parser.Default.ParseArguments<Options>(args)
             model.SaveModel(modelFile);
             Console.WriteLine($"Model saved to {modelFile}");
         }
-        
+
         Console.WriteLine("Confusion Matrix:");
         Console.WriteLine("-----------------");
         Console.WriteLine(
@@ -111,84 +123,3 @@ await Parser.Default.ParseArguments<Options>(args)
         Console.WriteLine($"Gamma: {model.Parameter.Gamma}");
         Console.WriteLine($"Degree: {model.Parameter.Degree}");
     });
-
-
-static void ExportScatterPlot(string title, string[] features, double[] featureX, double[] featureY, int[] classes, string outputFile)
-{
-    var plotModel = new PlotModel {Title = title};
-    plotModel.Legends.Add(new Legend
-    {
-        LegendPlacement = LegendPlacement.Inside, 
-        LegendPosition = LegendPosition.RightTop,
-        LegendBackground = OxyColors.White,
-        LegendBorderThickness = 2,
-    });
-    plotModel.Axes.Add(new LinearAxis
-    {
-        Position = AxisPosition.Bottom,
-        Title = features[0],
-        Maximum = featureX.Max(),
-    });
-    plotModel.Axes.Add(new LinearAxis
-    {
-        Position = AxisPosition.Left,
-        Title = features[1],
-        Maximum = featureY.Max(),
-    });
-
-    var series = new Dictionary<int, ScatterSeries>();
-    foreach (var @class in classes)
-    {
-        if (!series.ContainsKey(@class))
-        {
-            var (color, marker) = GetColorAndMarkerType(@class);
-            var ss = new ScatterSeries
-            {
-                Title = $"{@class}",
-                MarkerType = marker,
-                MarkerFill = color,
-                MarkerStroke = OxyColors.Black,
-                MarkerStrokeThickness = 2,
-            };
-            series.Add(@class, ss);
-        }
-    }
-
-    for (var i = 0; i < featureX.Length; i++)
-    {
-        var point = new ScatterPoint(featureX[i], featureY[i]);
-        series[classes[i]].Points.Add(point);
-    }
-
-    foreach (var ss in series.Values)
-    {
-        plotModel.Series.Add(ss);
-    }
-
-    plotModel.Background = OxyColors.White;
-    PngExporter.Export(plotModel, outputFile, 600, 400);
-}
-
-static (OxyColor, MarkerType) GetColorAndMarkerType(int value)
-{
-    // Define a dictionary with color and marker type pairs
-    Dictionary<int, (OxyColor, MarkerType)> colorMarkerDict = new Dictionary<int, (OxyColor, MarkerType)>
-    {
-        { 0, (OxyColors.Red, MarkerType.Circle) },
-        { 1, (OxyColors.Blue, MarkerType.Square) },
-        { 2, (OxyColors.Green, MarkerType.Triangle) },
-        { 3, (OxyColors.Yellow, MarkerType.Diamond) },
-        { 4, (OxyColors.Purple, MarkerType.Plus) },
-        { 5, (OxyColors.Orange, MarkerType.Star) },
-        // Add more pairs as needed
-    };
-
-    // If the value exists in the dictionary, return the corresponding color and marker type
-    if (colorMarkerDict.TryGetValue(value, out var colorMarkerPair))
-    {
-        return colorMarkerPair;
-    }
-
-    // If the value does not exist in the dictionary, return a default color and marker type
-    return (OxyColors.Black, MarkerType.Cross);
-}

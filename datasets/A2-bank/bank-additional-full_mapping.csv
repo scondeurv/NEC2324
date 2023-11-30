@@ -1,77 +1,77 @@
-"job",Mapped Value
-"housemaid",0
-"services",1
-"admin.",2
-"blue-collar",3
-"technician",4
-"retired",5
-"management",6
-"unemployed",7
-"self-employed",8
-"unknown",9
-"entrepreneur",10
-"student",11
+job,Mapped Value
+housemaid,0
+services,1
+admin.,2
+blue-collar,3
+technician,4
+retired,5
+management,6
+unemployed,7
+self-employed,8
+unknown,9
+entrepreneur,10
+student,11
 
-"marital",Mapped Value
-"married",0
-"single",1
-"divorced",2
-"unknown",3
+marital,Mapped Value
+married,0
+single,1
+divorced,2
+unknown,3
 
-"education",Mapped Value
-"basic.4y",0
-"high.school",1
-"basic.6y",2
-"basic.9y",3
-"professional.course",4
-"unknown",5
-"university.degree",6
-"illiterate",7
+education,Mapped Value
+basic.4y,0
+high.school,1
+basic.6y,2
+basic.9y,3
+professional.course,4
+unknown,5
+university.degree,6
+illiterate,7
 
-"default",Mapped Value
-"no",0
-"unknown",1
-"yes",2
+default,Mapped Value
+no,0
+unknown,1
+yes,2
 
-"housing",Mapped Value
-"no",0
-"yes",1
-"unknown",2
+housing,Mapped Value
+no,0
+yes,1
+unknown,2
 
-"loan",Mapped Value
-"no",0
-"yes",1
-"unknown",2
+loan,Mapped Value
+no,0
+yes,1
+unknown,2
 
-"contact",Mapped Value
-"telephone",0
-"cellular",1
+contact,Mapped Value
+telephone,0
+cellular,1
 
-"month",Mapped Value
-"may",0
-"jun",1
-"jul",2
-"aug",3
-"oct",4
-"nov",5
-"dec",6
-"mar",7
-"apr",8
-"sep",9
+month,Mapped Value
+may,0
+jun,1
+jul,2
+aug,3
+oct,4
+nov,5
+dec,6
+mar,7
+apr,8
+sep,9
 
-"day_of_week",Mapped Value
-"mon",0
-"tue",1
-"wed",2
-"thu",3
-"fri",4
+day_of_week,Mapped Value
+mon,0
+tue,1
+wed,2
+thu,3
+fri,4
 
-"poutcome",Mapped Value
-"nonexistent",0
-"failure",1
-"success",2
+poutcome,Mapped Value
+nonexistent,0
+failure,1
+success,2
 
-"y",Mapped Value
-"no",0
-"yes",1
+y,Mapped Value
+no,0
+yes,1
 

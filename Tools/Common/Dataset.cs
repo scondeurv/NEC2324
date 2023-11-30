@@ -150,4 +150,29 @@ public class Dataset
 
         return (new Dataset(trainData), new Dataset(testData));
     }
+
+    public (double[][] X, double[] Y) Split(bool scaled = false)
+    {
+        var data = scaled ? ScaledData : Data;
+        var x = new double[data.First().Value.Length][];
+        var y = new double[data.First().Value.Length];
+        for (var row = 0; row < data.First().Value.Length; row++)
+        {
+            x[row] = new double[data.Count - 1];
+            var col = 0;
+            foreach (var feature in data.Keys)
+            {
+                if (feature == data.Keys.Last())
+                {
+                    y[row] = data[feature][row];
+                }
+                else
+                {
+                    x[row][col++] = data[feature][row];
+                }
+            }
+        }
+
+        return (x, y);
+    }
 }
