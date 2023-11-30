@@ -16,7 +16,7 @@ string[] features = default;
 var mappings = new Dictionary<string, Dictionary<string, int>>();
 var isHeader = true;
 var dataset = File.ReadLinesAsync(inputFile);
-await using var outputFile = File.CreateText($"{Path.GetFileNameWithoutExtension(inputFile)}_categorized.csv");
+await using var outputFile = File.CreateText($"{Path.GetFileNameWithoutExtension(inputFile)}-categorized.csv");
 
 await foreach(var line in dataset)
 {

@@ -11,7 +11,7 @@ public class DatasetPlotExporterTests
     //[InlineAutoData("Datasets/A2-ring-merged.txt", "\t", true)]
     //[InlineAutoData("Datasets/A2-ring-separable.txt", "\t", true)]
     //[InlineAutoData("Datasets/A2-ring-test.txt", "\t", true)]
-    [InlineAutoData("Datasets/bank-additional-full_categorized-scaled-minmax.csv", ";", false)]
+    [InlineAutoData("Datasets/bank-additional_categorized.csv", ";", false)]
     public async Task CreatePlots(string inputFile, string delimiter, bool noHeader)
     {
         //Arrange

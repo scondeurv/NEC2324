@@ -142,7 +142,7 @@ public sealed class DatasetPlotExporter
     {
         if (data.All(x => x is 0 or 1))
         {
-            return (2, 0.5 * binWidthFactor);
+            return (2, 0.3 * binWidthFactor);
         }
         else
         {

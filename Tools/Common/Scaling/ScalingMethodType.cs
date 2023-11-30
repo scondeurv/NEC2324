@@ -3,5 +3,6 @@
 public enum ScalingMethodType
 {
     MinMax,
-    ZScore
+    ZScore,
+    Robust,
 }

@@ -6,11 +6,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Categorize", "Categorize\Ca
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrawDist.Tests", "DrawDist.Tests\DrawDist.Tests.csproj", "{9D9B87A6-DCB9-4106-ADA4-F6862CDA0898}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Normalize", "Normalize\Normalize.csproj", "{0517A203-4ABC-40AC-8B6C-4F16A00904FC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scale", "Scale\Scale.csproj", "{0517A203-4ABC-40AC-8B6C-4F16A00904FC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{568A5706-1E13-48A3-9ED4-594C4680841A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DetectOutliers", "DetectOutliers\DetectOutliers.csproj", "{EAD6AC14-835D-4B1C-A8E6-4261213CE37E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Outliers", "Outliers\Outliers.csproj", "{EAD6AC14-835D-4B1C-A8E6-4261213CE37E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

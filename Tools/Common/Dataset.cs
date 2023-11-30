@@ -7,6 +7,15 @@ public class Dataset
 {
     public IReadOnlyDictionary<string, double[]> Data { get; private set; } = new Dictionary<string, double[]>(0);
     public IReadOnlyDictionary<string, double[]> ScaledData { get; private set; } = new Dictionary<string, double[]>(0);
+
+    public Dataset()
+    {
+    }
+    
+    public Dataset(IReadOnlyDictionary<string, double[]> data)
+    {
+        Data = data;
+    }
     
     public async Task Load(string fileName, string delimiter, bool noHeader)
     {
@@ -29,11 +38,13 @@ public class Dataset
 
             if (table.Count == 0)
             {
-                var index = 1;
-                foreach (var item in row.Split(delimiter))
+                var featureAmount = row.Split(delimiter).Length; 
+                for (var i = 0; i <  featureAmount - 1; i++)
                 {
-                    table.Add($"Feature {index++}", new List<double>());
+                    table.Add($"X{i}", new List<double>());
                 }
+                
+                table.Add($"Y", new List<double>());
             }
 
             var values = row
@@ -50,7 +61,7 @@ public class Dataset
         Data = table.ToDictionary(t => t.Key, t => t.Value.ToArray());
     }
     
-    public async Task Scale(IReadOnlyDictionary<string, IScalingMethod> scalingMethodPerFeature)
+    public async Task Scale(IReadOnlyDictionary<string, IScaler> scalingMethodPerFeature)
     {
         var features = Data.Keys.ToArray();
         var featuresToScale = scalingMethodPerFeature.Keys.ToList();
@@ -109,5 +120,34 @@ public class Dataset
             }
             await outputFile.WriteLineAsync(string.Join(delimiter, values));
         }
+    }
+    
+    public (Dataset Train, Dataset Test) SplitDataset(double trainPercentage, bool randomSplit = false)
+    {
+        if (trainPercentage < 0 || trainPercentage > 1)
+        {
+            throw new ArgumentException("Train percentage must be between 0 and 1.");
+        }
+
+        var trainSize = (int)(Data.First().Value.Length * trainPercentage);
+        var indices = Enumerable.Range(0, Data.First().Value.Length).ToList();
+
+        if (randomSplit)
+        {
+            var random = new Random();
+            indices = indices.OrderBy(x => random.Next()).ToList();
+        }
+
+        var trainData = new Dictionary<string, double[]>();
+        var testData = new Dictionary<string, double[]>();
+
+        foreach (var feature in Data.Keys)
+        {
+            var featureData = Data[feature];
+            trainData[feature] = indices.Take(trainSize).Select(index => featureData[index]).ToArray();
+            testData[feature] = indices.Skip(trainSize).Select(index => featureData[index]).ToArray();
+        }
+
+        return (new Dataset(trainData), new Dataset(testData));
     }
 }
