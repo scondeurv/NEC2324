@@ -34,35 +34,6 @@ await Parser.Default.ParseArguments<Options>(args)
         {
             model = SVM.LoadModel(opt.ModelFile);
             (confusionMatrix, expected, predicted) = SVMRunner.Predict(model, dataset.ToSVMProblem());
-            var roc = new ReceiverOperatingCharacteristic(expected.Select(p => p > 0).ToArray(),
-                predicted);
-            roc.Compute(1000);
-            Console.WriteLine($"AUC: {roc.Area}");
-
-            if (opt.ExportPlots)
-            {
-                var features = (opt.PlotFeatures?.Split(':') ?? dataset.Data.Keys.Take(2)).ToArray();
-                dataset.Data.TryGetValue(features[0], out var featureX);
-                dataset.Data.TryGetValue(features[1], out var featureY);
-                
-                var fileName = $"{Path.GetFileNameWithoutExtension(opt.DatasetFile)}-svm-expected.png";
-                PlotExporter.ExportScatterPlot($"Actual {dataset.Data.Keys.Last()}", features, featureX, featureY,
-                    expected,
-                    fileName);
-                Console.WriteLine($"Exported plot to {fileName}");
-                
-                fileName = $"{Path.GetFileNameWithoutExtension(opt.DatasetFile)}-svm-predicted.png";
-                PlotExporter.ExportScatterPlot($"Predicted {dataset.Data.Keys.Last()}", features, featureX, featureY,
-                    predicted,
-                    fileName);
-                Console.WriteLine($"Exported plot to {fileName}");
-                
-                fileName = $"{Path.GetFileNameWithoutExtension(opt.DatasetFile)}-svm-roc.png";
-                var points = roc.Points.Select(p =>
-                    (p.FalsePositiveRate, (double)p.TruePositives / (p.TruePositives + p.FalseNegatives)));
-                PlotExporter.ExportRoc(points, $"{Path.GetFileNameWithoutExtension(opt.DatasetFile)}-roc.png");
-                Console.WriteLine($"Exported ROC plot to {fileName}");
-            }
         }
         else
         {
@@ -93,7 +64,7 @@ await Parser.Default.ParseArguments<Options>(args)
             (parameters, model, confusionMatrix) = runner.RunSVC(svmType, trainProblem, testProblem,
                 optimizer: optimizer, iterations: opt.Iterations, fScoreTarget: opt.FScore, kernelType: kernelType);
 
-            var modelFile = $"{Path.GetFileNameWithoutExtension(opt.DatasetFile)}-model.txt";
+            var modelFile = $"{Path.GetFileNameWithoutExtension(opt.DatasetFile)}-svm-model.txt";
             model.SaveModel(modelFile);
             Console.WriteLine($"Model saved to {modelFile}");
         }
@@ -110,6 +81,12 @@ await Parser.Default.ParseArguments<Options>(args)
         Console.WriteLine($"Precision: {confusionMatrix.Precision}");
         Console.WriteLine($"Sensitivity: {confusionMatrix.Sensitivity}");
         Console.WriteLine($"FScore: {confusionMatrix.FScore}");
+        
+        var classificationError = 100.0*(confusionMatrix.FalseNegatives + confusionMatrix.FalsePositives)/
+                                  (confusionMatrix.TruePositives + confusionMatrix.TrueNegatives +
+                                   confusionMatrix.FalseNegatives + confusionMatrix.FalsePositives);
+        Console.WriteLine($"Classification Error (%): {classificationError}");
+        
         if (model.Parameter.Type == SVMType.C_SVC)
         {
             Console.WriteLine($"C: {model.Parameter.C}");
@@ -122,4 +99,33 @@ await Parser.Default.ParseArguments<Options>(args)
 
         Console.WriteLine($"Gamma: {model.Parameter.Gamma}");
         Console.WriteLine($"Degree: {model.Parameter.Degree}");
+        var roc = new ReceiverOperatingCharacteristic(expected.Select(p => p > 0).ToArray(),
+            predicted);
+        roc.Compute(1000);
+        Console.WriteLine($"AUC: {roc.Area}");        
+        
+        if (opt.ExportPlots)
+        {
+            var features = (opt.PlotFeatures?.Split(':') ?? dataset.Data.Keys.Take(2)).ToArray();
+            dataset.Data.TryGetValue(features[0], out var featureX);
+            dataset.Data.TryGetValue(features[1], out var featureY);
+                
+            var fileName = $"{Path.GetFileNameWithoutExtension(opt.DatasetFile)}-svm-expected.png";
+            PlotExporter.ExportScatterPlot($"Actual {dataset.Data.Keys.Last()}", features, featureX, featureY,
+                expected,
+                fileName);
+            Console.WriteLine($"Exported plot to {fileName}");
+                
+            fileName = $"{Path.GetFileNameWithoutExtension(opt.DatasetFile)}-svm-predicted.png";
+            PlotExporter.ExportScatterPlot($"Predicted {dataset.Data.Keys.Last()}", features, featureX, featureY,
+                predicted,
+                fileName);
+            Console.WriteLine($"Exported plot to {fileName}");
+            
+            fileName = $"{Path.GetFileNameWithoutExtension(opt.DatasetFile)}-svm-roc.png";
+            var points = roc.Points.Select(p =>
+                (p.FalsePositiveRate, (double)p.TruePositives / (p.TruePositives + p.FalseNegatives)));
+            PlotExporter.ExportRoc(points, $"{Path.GetFileNameWithoutExtension(opt.DatasetFile)}-roc.png");
+            Console.WriteLine($"Exported ROC plot to {fileName}");
+        }
     });

@@ -28,15 +28,21 @@ public sealed class Options
     [Option('l', "threshold", Required = false, Default = 0.5, HelpText = "Threshold to use when classifying.")]
     public required double Threshold { get; init; }
     
-    [Option('r', "learning-rate", Required = false, Default = 0.1, HelpText = "Learning rate to use.")]
-    public required double LearningRate { get; init; }
+    [Option('r', "learning-rate", Required = false, Default = 0.1f, HelpText = "Learning rate to use.")]
+    public required float LearningRate { get; init; }
     
-    [Option('m', "momentum", Required = false, Default = 0.5, HelpText = "Momentum to use.")]
-    public required double Momentum { get; init; }
+    [Option('n', "momentum", Required = false, Default = 0.5f, HelpText = "Momentum to use.")]
+    public required float Momentum { get; init; }
     
-    [Option('l', "layers", Required = true,  HelpText = "Layer configuration: 2:3:4:1.")]
+    [Option('y', "layers", Required = true,  HelpText = "Layer configuration: 2:3:4:1.")]
     public required string Layers { get; init; }
     
     [Option('a', "activation", Required = true,  HelpText = "Activation function: sigmoid, tanh, relu, linear.")]
     public required string ActivationFunction { get; init; }
+    
+    [Option('c', "epochs", Required = false, Default = 10, HelpText = "Number of epochs to use.")]
+    public required int Epochs { get; init; }
+    
+    [Option('m', "model", Required = false, HelpText = "Model file to read.")]
+    public required string ModelFile { get; init; }
 }

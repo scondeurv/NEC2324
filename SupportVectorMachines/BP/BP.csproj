@@ -9,11 +9,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Accord" Version="3.8.0" />
-      <PackageReference Include="Accord.MachineLearning" Version="3.8.0" />
-      <PackageReference Include="Accord.Neuro" Version="3.8.0" />
       <PackageReference Include="Accord.Statistics" Version="3.8.0" />
       <PackageReference Include="CommandLineParser" Version="2.9.1" />
+      <PackageReference Include="SciSharp.TensorFlow.Redist" Version="2.16.0" />
+      <PackageReference Include="SciSharp.TensorFlow.Redist-OSX" Version="2.15.0" />
+      <PackageReference Include="SciSharp.TensorFlow.Redist-Windows-GPU" Version="2.10.3" />
+      <PackageReference Include="TensorFlow.Keras" Version="0.15.0" />
+      <PackageReference Include="TensorFlow.NET" Version="0.150.0" />
     </ItemGroup>
 
     <ItemGroup>

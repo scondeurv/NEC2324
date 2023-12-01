@@ -40,11 +40,16 @@ await Parser.Default.ParseArguments<Options>(args)
         Console.WriteLine("-----------------");
         Console.WriteLine(
             $"| FN: {confusionMatrix.FalseNegatives} | TN: {confusionMatrix.TrueNegatives} |");
-        Console.WriteLine("-----------------\n");
+        Console.WriteLine("-----------------");
         Console.WriteLine($"Accuracy: {confusionMatrix.Accuracy}");
         Console.WriteLine($"Precision: {confusionMatrix.Precision}");
         Console.WriteLine($"Sensitivity: {confusionMatrix.Sensitivity}");
         Console.WriteLine($"FScore: {confusionMatrix.FScore}");
+        
+        var classificationError = 100.0*(confusionMatrix.FalseNegatives + confusionMatrix.FalsePositives)/
+                                  (confusionMatrix.TruePositives + confusionMatrix.TrueNegatives +
+                                            confusionMatrix.FalseNegatives + confusionMatrix.FalsePositives);
+        Console.WriteLine($"Classification Error (%): {classificationError}");
 
         var roc = new ReceiverOperatingCharacteristic(testOutputs.ToArray(),
             predicted);
@@ -72,7 +77,7 @@ await Parser.Default.ParseArguments<Options>(args)
             fileName = $"{Path.GetFileNameWithoutExtension(opt.DatasetFile)}-mlr-roc.png";
             var points = roc.Points.Select(p =>
                 (p.FalsePositiveRate, (double)p.TruePositives / (p.TruePositives + p.FalseNegatives)));
-            PlotExporter.ExportRoc(points, $"{Path.GetFileNameWithoutExtension(opt.DatasetFile)}-roc.png");
+            PlotExporter.ExportRoc(points, fileName);
             Console.WriteLine($"Exported ROC plot to {fileName}");
         }
     });

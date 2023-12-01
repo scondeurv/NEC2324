@@ -175,6 +175,32 @@ public class Dataset
 
         return (x, y);
     }
+    
+    public (double[,] X, double[] Y) SplitMultidimensional(bool scaled = false)
+    {
+        var data = scaled ? ScaledData : Data;
+        var rows = data.First().Value.Length;
+        var cols = data.Count - 1;
+        var x = new double[rows, cols];
+        var y = new double[rows];
+        for (var row = 0; row < data.First().Value.Length; row++)
+        {
+            var col = 0;
+            foreach (var feature in data.Keys)
+            {
+                if (feature == data.Keys.Last())
+                {
+                    y[row] = data[feature][row];
+                }
+                else
+                {
+                    x[row, col++] = data[feature][row];
+                }
+            }
+        }
+
+        return (x, y);
+    }
 
     public double[][] ToJagged(bool scaled = false)
     {

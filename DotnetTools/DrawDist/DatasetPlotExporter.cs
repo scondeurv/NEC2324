@@ -13,33 +13,29 @@ public sealed class DatasetPlotExporter
     public async Task Export(Options opt)
     {
         var dataset = await ReadFile(opt.InputFile, opt.Delimiter, opt.NoHeader);
-        await Task
-            .WhenAll(
-                CreateHistogramSeries(dataset, out var histogramSeries),
-                CreateNormalSeries(dataset, 0.01, out var normalSeries)
-            );
-
+        var histogramSeries = CreateHistogramSeries(dataset);
+        var normalSeries = CreateNormalSeries(dataset, 0.01);
         string? fileName;
-        foreach (var item in histogramSeries)
+        foreach (var (histo, linear) in histogramSeries.Zip(normalSeries, (histo , linear) => (histo, linear)))
         {
             var plotModel = new PlotModel
             {
-                Title = item.Key,
+                Title = histo.Feature,
                 Background = OxyColors.White,
                 Axes =
                 {
                     new LinearAxis
                     {
                         Position = AxisPosition.Bottom,
-                        Minimum = dataset[item.Key].Min(),
-                        Maximum = dataset[item.Key].Max(),
-                        Title = item.Key,
+                        Minimum = dataset[histo.Feature].Min(),
+                        Maximum = dataset[histo.Feature].Max(),
+                        Title = histo.Feature,
                     },
                     new LinearAxis
                     {
                         Position = AxisPosition.Left,
                         Minimum = 0,
-                        Maximum = item.Value.Items.Max(i => i.Value) * 1.2,
+                        Maximum = histo.Series.Items.Max(i => i.Value) * 1.2,
                         Title = "Count",
                         PositionTier = 0,
                         Key = "HistogramAxis",
@@ -49,18 +45,18 @@ public sealed class DatasetPlotExporter
                     {
                         Position = AxisPosition.Left,
                         Minimum = 0,
-                        Maximum = normalSeries[item.Key].Points.Max(p => p.Y) * 1.2,
+                        Maximum = linear.Series.Points.Max(p => p.Y) * 1.2,
                         Title = "Density",
                         PositionTier = 1,
                         Key = "DensityAxis",
                     },
                 }
             };
-            item.Value.YAxisKey = "HistogramAxis";
-            normalSeries[item.Key].YAxisKey = "DensityAxis";
-            plotModel.Series.Add(item.Value);
-            plotModel.Series.Add(normalSeries[item.Key]);
-            fileName = $"{Path.GetFileNameWithoutExtension(opt.InputFile)}-{item.Key}";
+            histo.Series.YAxisKey = "HistogramAxis";
+            linear.Series.YAxisKey = "DensityAxis";
+            plotModel.Series.Add(histo.Series);
+            plotModel.Series.Add(linear.Series);
+            fileName = $"{Path.GetFileNameWithoutExtension(opt.InputFile)}-{histo.Feature}";
             PngExporter.Export(plotModel, $"{fileName}.png", 600,
                 400);
         }
@@ -81,10 +77,9 @@ public sealed class DatasetPlotExporter
         await writer.FlushAsync();
     }
 
-    private static Task CreateNormalSeries(IReadOnlyDictionary<string, double[]> dataset,
-        double resolution, out Dictionary<string, LineSeries> normalSeries)
+    private static IEnumerable<(string Feature, LineSeries Series)> CreateNormalSeries(IReadOnlyDictionary<string, double[]> dataset,
+        double resolution)
     {
-        normalSeries = new Dictionary<string, LineSeries>(dataset.Keys.Count());
         foreach (var feature in dataset.Keys)
         {
             var mean = ArrayStatistics.Mean(dataset[feature]);
@@ -92,28 +87,25 @@ public sealed class DatasetPlotExporter
             var normalDist = new Normal(mean, stdDev);
             var min = dataset[feature].Min();
             var max = dataset[feature].Max();
-
+            var step = (max - min) * resolution;
             var series = new LineSeries
             {
                 Title = "Normal Distribution",
-                Color = OxyColor.FromRgb(255,140,0)
+                Color = OxyColors.Red
             };
 
-            for (var x = min; x <= max; x += resolution)
+            for (var x = min; x <= max; x += step)
             {
                 series.Points.Add(new DataPoint(x, normalDist.Density(x)));
             }
 
-            normalSeries.Add(feature, series);
+            yield return (feature, series);
+            series.Points.Clear();
         }
-
-        return Task.CompletedTask;
     }
 
-    private static Task CreateHistogramSeries(IReadOnlyDictionary<string, double[]> dataset,
-        out Dictionary<string, HistogramSeries> histogramSeries)
+    private static  IEnumerable<(string Feature, HistogramSeries Series)> CreateHistogramSeries(IReadOnlyDictionary<string, double[]> dataset)
     {
-        histogramSeries = new Dictionary<string, HistogramSeries>(dataset.Keys.Count());
         foreach (var feature in dataset.Keys)
         {
             var series = new HistogramSeries();
@@ -130,15 +122,16 @@ public sealed class DatasetPlotExporter
                 series.Items.Add(bin);
             }
 
-            series.FillColor = OxyColor.FromRgb(173,216,230);
-            histogramSeries.Add(feature, series);
+            series.FillColor = OxyColors.Blue;
+            series.StrokeColor = OxyColors.Black;
+            series.StrokeThickness = 2;
+            yield return (feature, series);
+            series.Items.Clear();
         }
-
-        return Task.FromResult<IReadOnlyDictionary<string, HistogramSeries>>(histogramSeries);
     }
 
     private static (int NumberOfBins, double binWidth) CalculateBins(IReadOnlyCollection<double> data,
-        double binWidthFactor = 0.15)
+        double binWidthFactor = 1)
     {
         if (data.All(x => x is 0 or 1))
         {
@@ -164,43 +157,46 @@ public sealed class DatasetPlotExporter
         }
     }
 
-    private static async Task<IReadOnlyDictionary<string, double[]>> ReadFile(string fileName, string delimiter,
-        bool noHeader)
+    private static async Task<IReadOnlyDictionary<string, double[]>> ReadFile(string fileName, string delimiter, bool noHeader)
     {
-        var data = File.ReadLinesAsync(fileName);
         var isHeader = !noHeader;
         var table = new Dictionary<string, List<double>>();
-        await foreach (var row in data)
+
+        using (var reader = new StreamReader(fileName))
         {
-            if (isHeader)
+            string line;
+            while ((line = await reader.ReadLineAsync()) != null)
             {
-                var features = row.Split(delimiter);
-                foreach (var feature in features)
+                if (isHeader)
                 {
-                    table.Add(feature, new List<double>());
+                    var features = line.Split(delimiter);
+                    foreach (var feature in features)
+                    {
+                        table.Add(feature, new List<double>());
+                    }
+
+                    isHeader = false;
+                    continue;
                 }
 
-                isHeader = false;
-                continue;
-            }
-
-            if (table.Count == 0)
-            {
-                var index = 1;
-                foreach (var item in row.Split(delimiter))
+                if (table.Count == 0)
                 {
-                    table.Add($"Feature {index++}", new List<double>());
+                    var index = 1;
+                    foreach (var item in line.Split(delimiter))
+                    {
+                        table.Add($"Feature {index++}", new List<double>());
+                    }
                 }
-            }
 
-            var values = row
-                .Split(delimiter)
-                .Select(v => double.Parse(v, CultureInfo.InvariantCulture))
-                .ToArray();
-            var col = 0;
-            foreach (var feature in table.Keys)
-            {
-                table[feature].Add(values[col++]);
+                var values = line
+                    .Split(delimiter)
+                    .Select(v => double.Parse(v, CultureInfo.InvariantCulture))
+                    .ToArray();
+                var col = 0;
+                foreach (var feature in table.Keys)
+                {
+                    table[feature].Add(values[col++]);
+                }
             }
         }
 
