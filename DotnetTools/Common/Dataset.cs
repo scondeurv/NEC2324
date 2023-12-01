@@ -175,4 +175,22 @@ public class Dataset
 
         return (x, y);
     }
+
+    public double[][] ToJagged(bool scaled = false)
+    {
+        var src = scaled ? ScaledData : Data;
+        var dest = new double[src.First().Value.Length][];
+        
+        for (var row = 0; row < src.First().Value.Length; row++)
+        {
+            dest[row] = new double[src.Count];
+            var col = 0;
+            foreach (var feature in src.Keys)
+            {
+                dest[row][col++] = src[feature][row];
+            }
+        }
+
+        return dest;
+    }
 }

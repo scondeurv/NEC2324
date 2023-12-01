@@ -45,19 +45,19 @@ await Parser.Default.ParseArguments<Options>(args)
                 dataset.Data.TryGetValue(features[0], out var featureX);
                 dataset.Data.TryGetValue(features[1], out var featureY);
                 
-                var fileName = $"{Path.GetFileNameWithoutExtension(opt.DatasetFile)}-expected.png";
+                var fileName = $"{Path.GetFileNameWithoutExtension(opt.DatasetFile)}-svm-expected.png";
                 PlotExporter.ExportScatterPlot($"Actual {dataset.Data.Keys.Last()}", features, featureX, featureY,
                     expected,
                     fileName);
                 Console.WriteLine($"Exported plot to {fileName}");
                 
-                fileName = $"{Path.GetFileNameWithoutExtension(opt.DatasetFile)}-predicted.png";
+                fileName = $"{Path.GetFileNameWithoutExtension(opt.DatasetFile)}-svm-predicted.png";
                 PlotExporter.ExportScatterPlot($"Predicted {dataset.Data.Keys.Last()}", features, featureX, featureY,
                     predicted,
                     fileName);
                 Console.WriteLine($"Exported plot to {fileName}");
                 
-                fileName = $"{Path.GetFileNameWithoutExtension(opt.DatasetFile)}-roc.png";
+                fileName = $"{Path.GetFileNameWithoutExtension(opt.DatasetFile)}-svm-roc.png";
                 var points = roc.Points.Select(p =>
                     (p.FalsePositiveRate, (double)p.TruePositives / (p.TruePositives + p.FalseNegatives)));
                 PlotExporter.ExportRoc(points, $"{Path.GetFileNameWithoutExtension(opt.DatasetFile)}-roc.png");

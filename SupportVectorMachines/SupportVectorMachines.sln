@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "..\DotnetTools\Co
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BP", "BP\BP.csproj", "{CA79A450-A32D-41ED-BC29-AE319542A6EB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.ML", "..\DotnetTools\Common.ML\Common.ML.csproj", "{04CE19AF-F21C-49E5-9F9B-0300807FF937}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{CA79A450-A32D-41ED-BC29-AE319542A6EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CA79A450-A32D-41ED-BC29-AE319542A6EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CA79A450-A32D-41ED-BC29-AE319542A6EB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{04CE19AF-F21C-49E5-9F9B-0300807FF937}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{04CE19AF-F21C-49E5-9F9B-0300807FF937}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{04CE19AF-F21C-49E5-9F9B-0300807FF937}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{04CE19AF-F21C-49E5-9F9B-0300807FF937}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
