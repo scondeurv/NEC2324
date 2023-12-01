@@ -1,10 +1,9 @@
 ﻿using CommandLine;
 
-namespace SupportVectorMachines.MLR;
+namespace SupportVectorMachines.BP;
 
 public sealed class Options
 {
-    
     [Option('x', "export-plots", Required = false, Default = false, HelpText = "Export plots to compare actual values with predicted values.")]
     public required bool ExportPlots { get; init; }
     
@@ -28,4 +27,16 @@ public sealed class Options
     
     [Option('l', "threshold", Required = false, Default = 0.5, HelpText = "Threshold to use when classifying.")]
     public required double Threshold { get; init; }
+    
+    [Option('r', "learning-rate", Required = false, Default = 0.1, HelpText = "Learning rate to use.")]
+    public required double LearningRate { get; init; }
+    
+    [Option('m', "momentum", Required = false, Default = 0.5, HelpText = "Momentum to use.")]
+    public required double Momentum { get; init; }
+    
+    [Option('l', "layers", Required = true,  HelpText = "Layer configuration: 2:3:4:1.")]
+    public required string Layers { get; init; }
+    
+    [Option('a', "activation", Required = true,  HelpText = "Activation function: sigmoid, tanh, relu, linear.")]
+    public required string ActivationFunction { get; init; }
 }

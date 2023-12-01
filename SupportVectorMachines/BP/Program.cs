@@ -1,7 +1,15 @@
-﻿using Accord.Statistics.Analysis;
+﻿using Accord.MachineLearning;
+using Accord.MachineLearning.VectorMachines;
+using Accord.MachineLearning.VectorMachines.Learning;
+using Accord.Math;
+using Accord.Math.Optimization.Losses;
+using Accord.Neuro;
+using Accord.Neuro.Learning;
+using Accord.Statistics.Analysis;
+using Accord.Statistics.Kernels;
 using Accord.Statistics.Models.Regression.Linear;
 using CommandLine;
-using SupportVectorMachines.MLR;
+using SupportVectorMachines.BP;
 using Tools.Common;
 
 await Parser.Default.ParseArguments<Options>(args)
@@ -22,14 +30,53 @@ await Parser.Default.ParseArguments<Options>(args)
         {
             (trainDataset, testDataset) = dataset.SplitDataset(opt.TrainingPercentage);
         }
+        
+        var cv = CrossValidation.Create(
 
-        var ols = new OrdinaryLeastSquares();
+            k: 10, // We will be using k = 10 folds
 
-        var (trainInputs, trainOutputs) = trainDataset.Split();
-        var regression = ols.Learn(trainInputs, trainOutputs);
-        var (testInputs, testOutputs) = testDataset.Split();
-        var result = regression.Transform(testInputs);
-        var predicted = result.Select(p => p > opt.Threshold ? 1.0 : 0.0).ToArray();
+            learner: (p) => new SequentialMinimalOptimization<Gaussian>()
+            {
+                Complexity = 100 // Complexity parameter C
+            },
+
+            // How to split the data into training/validation
+            splitter: (indices) => new KFoldSplitter<Gaussian>(k: 10).Split(indices),
+
+            // Define the fitting function
+            fit: (teacher, x, y, w) => teacher.Run(new SupportVectorMachine<Gaussian>(inputs: 2), x, y),
+
+            // Define the testing function
+            loss: (actual, expected, m) => new ZeroOneLoss(expected).Loss(actual),
+
+            // Define how to compute the expected outputs for the machine
+            compute: (svm, x) => svm.Decide(x)
+        );
+
+// Compute the cross-validation
+        var result = cv.Compute(trainDataset.ToSVMProblem());
+
+// Get the cross-validation performance
+        double crossValidationPerformance = result.Mean;
+        
+        var numberOfInputs = dataset.Data.Count - 1;
+        var layers = opt.Layers.Split(':').Select(int.Parse).ToArray();
+        var activationInfo = GetActivationFunction(opt.ActivationFunction);
+        
+        var network = new ActivationNetwork(activationInfo, numberOfInputs, layers);
+        var bp = new BackPropagationLearning(network)
+        {
+            LearningRate = opt.LearningRate, 
+            Momentum = opt.Momentum, 
+        };
+
+        
+// Train the network using the teacher
+        var error = 1.0;
+        while (error > targetError)
+        {
+            error = bp.Run();
+        }
 
         var confusionMatrix = new ConfusionMatrix(predicted.Select(p => (int)p).ToArray(),
             testOutputs.Select(o => (int)o).ToArray());
@@ -76,3 +123,16 @@ await Parser.Default.ParseArguments<Options>(args)
             Console.WriteLine($"Exported ROC plot to {fileName}");
         }
     });
+    
+    static IActivationFunction GetActivationFunction(string activationFunction)
+    {
+        return activationFunction switch
+        {
+            "sigmoid" => new SigmoidFunction(),
+            "tanh" => new BipolarSigmoidFunction(),
+            "relu" => new RectifiedLinearFunction(),
+            "linear" => new LinearFunction(),
+            _ => throw new ArgumentOutOfRangeException(nameof(activationFunction), activationFunction,
+                "Invalid activation function.")
+        };
+    }

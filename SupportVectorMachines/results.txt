@@ -49,4 +49,17 @@ Gamma: 93,19999999999898
 Degree: 2
 Model saved to mushrooms-categorized-scaled-model.txt
 
-SupportVectorMachines.RunSVM -t "E:\src\NEC2324\datasets\A2-banl-full-categorized-scaled.csv" -d ";" -i 20 -f 0.8 -k poly -s nu -f 0.8
+ MLR -t "E:\src\NEC2324\datasets\A2-bank\bank-additional-categorized-scaled.csv" -d ";" -x -l 0.2323
+
+ Confusion Matrix:
+-----------------
+| TP: 68 | FP: 93 |
+-----------------
+| FN: 12 | TN: 651 |
+-----------------
+
+Accuracy: 0,8725728155339806
+Precision: 0,422360248447205
+Sensitivity: 0,85
+FScore: 0,5643153526970954
+AUC: 0,8625
