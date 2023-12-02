@@ -61,7 +61,7 @@ await Parser.Default.ParseArguments<Options>(args)
                 "sigmoid" => SVMKernelType.SIGMOID,
                 _ => throw new ArgumentException($"Invalid kernel type: {opt.Kernel}")
             };
-            (parameters, model, confusionMatrix) = runner.RunSVC(svmType, trainProblem, testProblem,
+            (parameters, model, confusionMatrix, expected, predicted) = runner.RunSVC(svmType, trainProblem, testProblem,
                 optimizer: optimizer, iterations: opt.Iterations, fScoreTarget: opt.FScore, kernelType: kernelType);
 
             var modelFile = $"{Path.GetFileNameWithoutExtension(opt.DatasetFile)}-svm-model.txt";
@@ -107,9 +107,19 @@ await Parser.Default.ParseArguments<Options>(args)
         if (opt.ExportPlots)
         {
             var features = (opt.PlotFeatures?.Split(':') ?? dataset.Data.Keys.Take(2)).ToArray();
-            dataset.Data.TryGetValue(features[0], out var featureX);
-            dataset.Data.TryGetValue(features[1], out var featureY);
-                
+            double[] featureX = null;
+            double[] featureY = null;
+            if (opt.ModelFile != null)
+            {
+                dataset.Data.TryGetValue(features[0], out featureX);
+                dataset.Data.TryGetValue(features[1], out featureY);
+            }
+            else
+            {
+                testDataset.Data.TryGetValue(features[0], out featureX);
+                testDataset.Data.TryGetValue(features[1], out  featureY);
+            }
+
             var fileName = $"{Path.GetFileNameWithoutExtension(opt.DatasetFile)}-svm-expected.png";
             PlotExporter.ExportScatterPlot($"Actual {dataset.Data.Keys.Last()}", features, featureX, featureY,
                 expected,

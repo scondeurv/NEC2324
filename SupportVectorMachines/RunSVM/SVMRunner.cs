@@ -6,7 +6,7 @@ namespace SupportVectorMachines.RunSVM;
 
 public sealed class SVMRunner
 {
-    public (SVMParameter, SVMModel, ConfusionMatrix) RunSVC(
+    public (SVMParameter, SVMModel, ConfusionMatrix, int[] Expected, int[] Predicted) RunSVC(
         SVMType svmType,
         SVMProblem problem,
         SVMProblem testProblem,
@@ -18,6 +18,8 @@ public sealed class SVMRunner
         SVMModel bestModel = null;
         SVMParameter bestParameter = null;
         ConfusionMatrix confusionMatrix = null;
+        int[] expected = null;
+        int[] predicted = null;
 
         const double csStart = 0.1;
         const int csEnd = 100;
@@ -32,20 +34,20 @@ public sealed class SVMRunner
         switch (optimizer)
         {
             case SVMOptimizer.GridSearch:
-                (bestParameter, bestModel, confusionMatrix) = GridSearch(svmType, problem, testProblem, Run, svmType == SVMType.C_SVC ? csStart : nuStart,
+                (bestParameter, bestModel, confusionMatrix, expected, predicted) = GridSearch(svmType, problem, testProblem, Run, svmType == SVMType.C_SVC ? csStart : nuStart,
                     svmType == SVMType.C_SVC ? csEnd : nuEnd, svmType == SVMType.C_SVC ? csStep : nuStep, gammaStart, gammaEnd, gammaStep, fScoreTarget, kernelType);
                 break;
             case SVMOptimizer.RandomSearch:
-                (bestParameter, bestModel, confusionMatrix) = RandomSearch(svmType, problem, testProblem, Run, svmType == SVMType.C_SVC ? csStart : nuStart,
+                (bestParameter, bestModel, confusionMatrix, expected, predicted) = RandomSearch(svmType, problem, testProblem, Run, svmType == SVMType.C_SVC ? csStart : nuStart,
                     svmType == SVMType.C_SVC ? csEnd : nuEnd, svmType == SVMType.C_SVC ? csStep : nuStep, gammaStart, gammaEnd, gammaStep, fScoreTarget, kernelType, iterations);
                 break;
         }
 
-        return (bestParameter, bestModel, confusionMatrix);
+        return (bestParameter, bestModel, confusionMatrix, expected, predicted);
     }
 
     
-    private static (SVMParameter, SVMModel, ConfusionMatrix) Run(SVMType svmType, SVMProblem problem, SVMProblem testProblem, double cOrNu,
+    private static (SVMParameter, SVMModel, ConfusionMatrix, int[] Expected, int[] Predicted) Run(SVMType svmType, SVMProblem problem, SVMProblem testProblem, double cOrNu,
         double gamma, int degree, SVMKernelType kernel)
     {
         var parameter = new SVMParameter
@@ -69,9 +71,9 @@ public sealed class SVMRunner
         }
         
         var model = SVM.Train(problem, parameter);
-        var cm = Predict(model, testProblem).ConfusionMatrix;
+        var (cm, expected, predicted) = Predict(model, testProblem);
         
-        return (parameter, model, cm);
+        return (parameter, model, cm, expected, predicted);
     }
     
     public static (ConfusionMatrix ConfusionMatrix, int[] Expected, int[] Predicted) Predict(SVMModel model, SVMProblem testProblem)
@@ -85,9 +87,9 @@ public sealed class SVMRunner
         return (cm, expected, predicted);
     }
     
-    private static (SVMParameter, SVMModel, ConfusionMatrix) GridSearch(SVMType smvType, SVMProblem problem,
+    private static (SVMParameter, SVMModel, ConfusionMatrix, int[] Expected, int[] Predicted) GridSearch(SVMType smvType, SVMProblem problem,
         SVMProblem testProblem,
-        Func<SVMType, SVMProblem, SVMProblem, double, double, int, SVMKernelType, (SVMParameter, SVMModel, ConfusionMatrix)>
+        Func<SVMType, SVMProblem, SVMProblem, double, double, int, SVMKernelType, (SVMParameter, SVMModel, ConfusionMatrix, int[], int[])>
             run,
         double cOrNusStart = 0.1,
         double csOrNusEnd = 100,
@@ -102,6 +104,8 @@ public sealed class SVMRunner
         SVMModel bestModel = null;
         SVMParameter bestParameter = null;
         ConfusionMatrix bestConfusionMatrix = null;
+        int[] bestExpected = null;
+        int[] bestPredicted = null;
 
         var csOrNus = GenerateRange(cOrNusStart, csOrNusEnd, csOrNusStep);
         var gammas = GenerateRange(gammaStart, gammaEnd, gammaStep);
@@ -113,7 +117,7 @@ public sealed class SVMRunner
             {
                 for (var k = 0; k < degrees.Length; k++)
                 {
-                    var (parameter, model, confusionMatrix) = run(smvType, problem, testProblem, csOrNus[i], gammas[j], degrees[k],
+                    var (parameter, model, confusionMatrix, expected, predicted) = run(smvType, problem, testProblem, csOrNus[i], gammas[j], degrees[k],
                         kernelType);
                     if (confusionMatrix.FScore > bestFScore)
                     {
@@ -121,6 +125,8 @@ public sealed class SVMRunner
                         bestParameter = parameter;
                         bestModel = model;
                         bestConfusionMatrix = confusionMatrix;
+                        bestExpected = expected;
+                        bestPredicted = predicted;
                     }
 
                     if (bestFScore >= fScoreTarget)
@@ -131,12 +137,12 @@ public sealed class SVMRunner
             }
         }
 
-        return (bestParameter, bestModel, bestConfusionMatrix);
+        return (bestParameter, bestModel, bestConfusionMatrix, bestExpected, bestPredicted);
     }
 
-    private static (SVMParameter, SVMModel, ConfusionMatrix) RandomSearch(SVMType svmType, SVMProblem problem,
+    private static (SVMParameter, SVMModel, ConfusionMatrix, int[] Expected, int[] Predicted) RandomSearch(SVMType svmType, SVMProblem problem,
         SVMProblem testProblem,
-        Func<SVMType, SVMProblem, SVMProblem, double, double, int, SVMKernelType, (SVMParameter, SVMModel, ConfusionMatrix)>
+        Func<SVMType, SVMProblem, SVMProblem, double, double, int, SVMKernelType, (SVMParameter, SVMModel, ConfusionMatrix, int[], int[])>
             run,
         double cOrNusStart = 0.1,
         double csOrNusEnd = 100,
@@ -152,6 +158,8 @@ public sealed class SVMRunner
         SVMModel bestModel = null;
         SVMParameter bestParameter = null;
         ConfusionMatrix bestConfusionMatrix = null;
+        int[] bestExpected = null;
+        int[] bestPredicted = null;
         
         var cs = GenerateRange(cOrNusStart, csOrNusEnd, csOrNusStep);
         var gammas = GenerateRange(gammaStart, gammaEnd, gammaStep);
@@ -163,7 +171,7 @@ public sealed class SVMRunner
             var c = cs[rand.Next(cs.Length)];
             var gamma = gammas[rand.Next(gammas.Length)];
             var degree = degrees[rand.Next(degrees.Length)];
-            var (parameter, model, confusionMatrix) =
+            var (parameter, model, confusionMatrix, expected, predicted) =
                 run(svmType, problem, testProblem, c, gamma, degree, kernelType);
             if (confusionMatrix.FScore > bestFScore)
             {
@@ -171,6 +179,8 @@ public sealed class SVMRunner
                 bestParameter = parameter;
                 bestModel = model;
                 bestConfusionMatrix = confusionMatrix;
+                bestExpected = expected;
+                bestPredicted = predicted;
             }
 
             if (bestFScore >= fScoreTarget)
@@ -179,7 +189,7 @@ public sealed class SVMRunner
             }
         }
 
-        return (bestParameter, bestModel, bestConfusionMatrix);
+        return (bestParameter, bestModel, bestConfusionMatrix, bestExpected, bestPredicted);
     }
 
     private static double[] GenerateRange(double start, double end, double step)
