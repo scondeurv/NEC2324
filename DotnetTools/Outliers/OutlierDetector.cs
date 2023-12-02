@@ -1,5 +1,6 @@
 ﻿using OxyPlot;
 using OxyPlot.Core.Drawing;
+using OxyPlot.Legends;
 using OxyPlot.Series;
 
 namespace Tools.Outliers;
@@ -51,8 +52,16 @@ internal sealed class OutlierDetector
         foreach (var feature in data.Keys)
         {
             var plotModel = new PlotModel { Title = $"{feature} - Outliers" };
-            var outlierSeries = new ScatterSeries { MarkerType = MarkerType.Circle, MarkerFill = OxyColors.Red };
-            var regularSeries = new ScatterSeries { MarkerType = MarkerType.Circle, MarkerFill = OxyColors.Blue };
+            plotModel.Legends.Add(new Legend
+            {
+                LegendPlacement = LegendPlacement.Outside,
+                LegendPosition = LegendPosition.RightTop,
+                LegendBackground = OxyColors.White,
+                LegendBorder = OxyColors.Black,
+                LegendBorderThickness = 2,
+            });
+            var outlierSeries = new ScatterSeries { Title = "Outlier", MarkerType = MarkerType.Diamond, MarkerFill = OxyColors.Red, MarkerStroke = OxyColors.Black};
+            var regularSeries = new ScatterSeries { Title = "Norm", MarkerType = MarkerType.Circle, MarkerFill = OxyColors.Blue , MarkerStroke = OxyColors.Black};
 
             for (var i = 0; i < data[feature].Length; i++)
             {

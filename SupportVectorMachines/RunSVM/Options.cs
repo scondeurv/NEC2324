@@ -31,7 +31,7 @@ public sealed class Options
     [Option('o', "optimizer", Required = false, Default = "random", HelpText = "Optimizer to use (random or search).")]
     public required string Optimizer { get; init; }
     
-    [Option('i', "iterations", Required = false, Default = 100, HelpText = "Iterations to use when using the random optimizer.")]
+    [Option('i', "iterations", Required = false, Default = 10, HelpText = "Iterations to use when using the random optimizer.")]
     public required int Iterations { get; init; }
     
     [Option('f', "fscore", Required = false, Default = 0.8, HelpText = "Fscore target")]

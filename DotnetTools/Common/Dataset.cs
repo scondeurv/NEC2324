@@ -219,4 +219,28 @@ public class Dataset
 
         return dest;
     }
+    
+    public IEnumerable<(double[][] TrainingSet, double[][] TestSet)> SplitKFold(int folds)
+    {
+        var data = ToJagged();
+        var totalSize = data.Length;
+        var foldSize = totalSize / folds;
+        var indices = Enumerable.Range(0, totalSize).ToArray();
+        
+        var rand = new Random();
+        indices = indices.OrderBy(a => rand.Next()).ToArray();
+
+        for (var k = 0; k < folds; k++)
+        {
+            var testStartIndex = k * foldSize;
+            var testEndIndex = (k + 1) * foldSize;
+            
+            var testSet = indices.Skip(testStartIndex).Take(foldSize).Select(index => data[index]).ToArray();
+            
+            var trainingSet = indices.Where((_, index) => index < testStartIndex || index >= testEndIndex)
+                .Select(index => data[index]).ToArray();
+
+            yield return (trainingSet, testSet);
+        }
+    }
 }

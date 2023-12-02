@@ -1,3 +1,4 @@
+
 -f "E:\src\NEC2324\datasets\A2-bank\bank-additional-categorized.csv" -d ";" -s nr.employed:minmax euribor3m:minmax cons.conf.idx:minmax cons.price.idx:minmax emp.var.rate:minmax poutcome:minmax previous:minmax pdays:minmax campaign:minmax duration:minmax day_of_week:minmax month:minmax loan:minmax housing:minmax default:minmax education:minmax marital:minmax job:minmax age:minmax 
 
 SupportVectorMachines.RunSVM -t "E:\src\NEC2324\datasets\A2-ring\A2-ring-merged.txt" -e "E:\src\NEC2324\datasets\A2-ring\A2-ring-test.txt" -i 20 --no-header -k rbf -s c -f 1.0
