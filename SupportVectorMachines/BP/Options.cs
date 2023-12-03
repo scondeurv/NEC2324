@@ -13,9 +13,6 @@ public sealed class Options
     [Option('t', "training-file", Required = true, HelpText = "Training file to read.")]
     public required string DatasetFile { get; init; }
     
-    [Option('e', "test-file", Required = false, HelpText = "Test dataset file to read.")]
-    public required string TestFile { get; init; }
-    
     [Option('d', "delimiter", Required = false, Default = "\t", HelpText = "Delimiter to use when reading the input file.")]
     public required string Delimiter { get; init; }
     
@@ -34,10 +31,10 @@ public sealed class Options
     [Option('n', "momentum", Required = false, Default = 0.5f, HelpText = "Momentum to use.")]
     public required float Momentum { get; init; }
     
-    [Option('y', "layers", Required = true,  HelpText = "Layer configuration: 2:3:4:1.")]
+    [Option('y', "layers", Required = false, Default = "13:9:5:1",  HelpText = "Layer configuration: 2:3:4:1.")]
     public required string Layers { get; init; }
     
-    [Option('a', "activation", Required = true,  HelpText = "Activation function: sigmoid, tanh, relu, linear.")]
+    [Option('a', "activation", Required = false, Default  = "tanh", HelpText = "Activation function: sigmoid, tanh, relu, linear.")]
     public required string ActivationFunction { get; init; }
     
     [Option('c', "epochs", Required = false, Default = 10, HelpText = "Number of epochs to use.")]

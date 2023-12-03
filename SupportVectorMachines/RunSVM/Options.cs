@@ -16,9 +16,6 @@ public sealed class Options
     [Option('t', "training-file", Required = true, HelpText = "Training file to read.")]
     public required string DatasetFile { get; init; }
     
-    [Option('e', "test-file", Required = false, HelpText = "Test dataset file to read.")]
-    public required string TestFile { get; init; }
-    
     [Option('d', "delimiter", Required = false, Default = "\t", HelpText = "Delimiter to use when reading the input file.")]
     public required string Delimiter { get; init; }
     

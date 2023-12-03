@@ -11,25 +11,16 @@ await Parser.Default.ParseArguments<Options>(args)
     {
         var dataset = new Dataset();
         await dataset.Load(opt.DatasetFile, opt.Delimiter, opt.NoHeader);
-
-        Dataset trainDataset = null;
-        Dataset testDataset = null;
-        if (opt.TestFile != null)
-        {
-            trainDataset = dataset;
-            testDataset = new Dataset();
-            await testDataset.Load(opt.TestFile, opt.Delimiter, opt.NoHeader);
-        }
-        else
-        {
-            (trainDataset, testDataset) = dataset.SplitDataset(opt.TrainingPercentage);
-        }
-
+        
         ConfusionMatrix confusionMatrix = null;
         SVMModel model = null;
         SVMParameter parameters = null;
         int[] predicted = null;
         int[] expected = null;
+        double[] featureX = null;
+        double[] featureY = null;
+        Dataset validationDataset = null;
+        Dataset trainDataset = null;
         if (opt.ModelFile != null)
         {
             model = SVM.LoadModel(opt.ModelFile);
@@ -37,9 +28,10 @@ await Parser.Default.ParseArguments<Options>(args)
         }
         else
         {
+            (trainDataset, validationDataset) = dataset.SplitDataset(opt.TrainingPercentage);
             var runner = new SVMRunner();
             var trainProblem = trainDataset.ToSVMProblem();
-            var testProblem = testDataset.ToSVMProblem();
+            var validationProblem = validationDataset.ToSVMProblem();
 
             var optimizer = opt.Optimizer switch
             {
@@ -61,10 +53,10 @@ await Parser.Default.ParseArguments<Options>(args)
                 "sigmoid" => SVMKernelType.SIGMOID,
                 _ => throw new ArgumentException($"Invalid kernel type: {opt.Kernel}")
             };
-            (parameters, model, confusionMatrix, expected, predicted) = runner.RunSVC(svmType, trainProblem, testProblem,
+            (parameters, model, confusionMatrix, expected, predicted) = runner.RunSVC(svmType, trainProblem, validationProblem,
                 optimizer: optimizer, iterations: opt.Iterations, fScoreTarget: opt.FScore, kernelType: kernelType);
 
-            var modelFile = $"{Path.GetFileNameWithoutExtension(opt.DatasetFile)}-svm-model.txt";
+            var modelFile = $"{Path.GetFileNameWithoutExtension(opt.DatasetFile)}-svm.model";
             model.SaveModel(modelFile);
             Console.WriteLine($"Model saved to {modelFile}");
         }
@@ -107,8 +99,7 @@ await Parser.Default.ParseArguments<Options>(args)
         if (opt.ExportPlots)
         {
             var features = (opt.PlotFeatures?.Split(':') ?? dataset.Data.Keys.Take(2)).ToArray();
-            double[] featureX = null;
-            double[] featureY = null;
+
             if (opt.ModelFile != null)
             {
                 dataset.Data.TryGetValue(features[0], out featureX);
@@ -116,8 +107,8 @@ await Parser.Default.ParseArguments<Options>(args)
             }
             else
             {
-                testDataset.Data.TryGetValue(features[0], out featureX);
-                testDataset.Data.TryGetValue(features[1], out  featureY);
+                validationDataset.Data.TryGetValue(features[0], out featureX);
+                validationDataset.Data.TryGetValue(features[1], out  featureY);
             }
 
             var fileName = $"{Path.GetFileNameWithoutExtension(opt.DatasetFile)}-svm-expected.png";

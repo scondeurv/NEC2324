@@ -24,7 +24,7 @@
     <ItemGroup>
       <Content Include="..\lib\libsvm.dll">
         <Link>libsvm.dll</Link>
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
     </ItemGroup>
 

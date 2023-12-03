@@ -4,6 +4,8 @@ namespace SupportVectorMachines.MLR;
 
 public sealed class Options
 {
+    [Option('m', "model", Required = false, HelpText = "Model file to read.")]
+    public required string ModelFile { get; init; }
     
     [Option('x', "export-plots", Required = false, Default = false, HelpText = "Export plots to compare actual values with predicted values.")]
     public required bool ExportPlots { get; init; }
@@ -14,8 +16,6 @@ public sealed class Options
     [Option('t', "training-file", Required = true, HelpText = "Training file to read.")]
     public required string DatasetFile { get; init; }
     
-    [Option('e', "test-file", Required = false, HelpText = "Test dataset file to read.")]
-    public required string TestFile { get; init; }
     
     [Option('d', "delimiter", Required = false, Default = "\t", HelpText = "Delimiter to use when reading the input file.")]
     public required string Delimiter { get; init; }
