@@ -2,7 +2,7 @@
 
 public sealed class OutlierCleaner
 {
-    public IReadOnlyDictionary<string, double[]> CleanOutliers(IReadOnlyDictionary<string, double[]> data,
+    public IReadOnlyDictionary<string, double[]> DropOutliers(IReadOnlyDictionary<string, double[]> data,
         IReadOnlyDictionary<string, double[]> outliers)
     {
         var cleanedData = new Dictionary<string, List<double>>(data.Count);
@@ -34,5 +34,41 @@ public sealed class OutlierCleaner
         }
 
         return cleanedData.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToArray());
+    }
+    
+    public IReadOnlyDictionary<string, double[]> WinsorizeOutliers(IReadOnlyDictionary<string, double[]> data,
+        IReadOnlyDictionary<string, double[]> outliers, double lowerPercentile, double upperPercentile)
+    {
+        var winsorizedData = new Dictionary<string, List<double>>(data.Count);
+        foreach (var feature in data.Keys)
+        {
+            var sortedData = data[feature].OrderBy(x => x).ToArray();
+            var lowerBound = sortedData[(int)(lowerPercentile * sortedData.Length)];
+            var upperBound = sortedData[(int)(upperPercentile * sortedData.Length)];
+
+            var featureData = new List<double>();
+            foreach (var value in data[feature])
+            {
+                if (outliers[feature].Contains(value))
+                {
+                    if (value < lowerBound)
+                    {
+                        featureData.Add(lowerBound);
+                    }
+                    else if (value > upperBound)
+                    {
+                        featureData.Add(upperBound);
+                    }
+                }
+                else
+                {
+                    featureData.Add(value);
+                }
+            }
+
+            winsorizedData.Add(feature, featureData);
+        }
+
+        return winsorizedData.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToArray());
     }
 }

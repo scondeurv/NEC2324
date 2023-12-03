@@ -10,7 +10,7 @@ student,7
 retired,8
 housemaid,9
 unemployed,10
-unknown,0
+unknown,2
 
 marital,Mapped Value
 married,0
@@ -26,7 +26,7 @@ professional.course,3
 basic.6y,4
 basic.4y,5
 illiterate,6
-unknown,0
+unknown,2
 
 default,Mapped Value
 no,0

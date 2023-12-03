@@ -30,7 +30,11 @@ await Parser.Default.ParseArguments<Options>(args)
         }
         else
         {
-            var ols = new OrdinaryLeastSquares();
+            var ols = new OrdinaryLeastSquares
+            {
+                UseIntercept = true,
+                IsRobust = true,
+            };
             (trainDataset, validationDataset) = dataset.SplitDataset(opt.TrainingPercentage);
             var (trainInputs, trainOutputs) = trainDataset.Split();
             regression = ols.Learn(trainInputs, trainOutputs);

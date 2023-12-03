@@ -18,6 +18,6 @@ public class Options
     
     [Option('t', "threshold", Required = false, Default = 3.0, HelpText = "Zscore threshold.")]
     public required double Threshold { get; init; }
-    [Option('c', "clean", Required = false, Default = false, HelpText = "Clean the dataset")]
-    public required bool Clean { get; init; }
+    [Option('c', "clean", Required = false, HelpText = "Method to clean the dataset: drop or winsorize.")]
+    public required string? Clean { get; init; }
 }
