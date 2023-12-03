@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrawDist", "DrawDist\DrawDist.csproj", "{54535787-0B91-4DD8-A454-CD8EC8AD27B4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OneHotCoder", "OneHotCoder\OneHotCoder.csproj", "{906A9684-8680-4EC4-9603-4B60DDCE72AE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LabelEncoder", "LabelEncoder\LabelEncoder.csproj", "{906A9684-8680-4EC4-9603-4B60DDCE72AE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scale", "Scale\Scale.csproj", "{0517A203-4ABC-40AC-8B6C-4F16A00904FC}"
 EndProject

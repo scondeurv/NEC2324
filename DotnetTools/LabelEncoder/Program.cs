@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using CommandLine;
 using Tools.Common;
-using Tools.OneHotCoder;
+using Tools.LabelEncoder;
 
 await Parser.Default.ParseArguments<Options>(args)
     .WithParsedAsync(async opt =>
