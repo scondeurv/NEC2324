@@ -11,6 +11,8 @@
       <PackageReference Include="CommandLineParser" Version="2.9.1" />
       <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
       <PackageReference Include="Microsoft.ML" Version="3.0.0" />
+      <PackageReference Include="OxyPlot.Core" Version="2.1.2" />
+      <PackageReference Include="OxyPlot.Core.Drawing" Version="2.1.0" />
     </ItemGroup>
 
 </Project>

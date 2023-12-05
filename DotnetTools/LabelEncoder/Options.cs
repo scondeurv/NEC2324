@@ -13,8 +13,8 @@ public sealed class Options
     [Option('h', "no-header", Required = false, Default = false, HelpText = "Delimiter to use when reading the input file.")]
     public required bool NoHeader { get; init; }
     
-    [Option('m', "missing-labels", Required = false, Default = false, HelpText = "Missing labels")]
-    public required IEnumerable<string> MissingLabels { get; init; }
+    [Option('m', "missing-labels", Required = false, HelpText = "Missing labels")]
+    public IEnumerable<string> MissingLabels { get; init; }
     
     [Option('i', "imputation-method", Required = false, Default = "mean", HelpText = "Imputation method (mean, mode or median). Default: median")]
     public required string ImputationMethod { get; init; }

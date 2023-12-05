@@ -1,0 +1,48 @@
+Gender,Mapped Value
+Female,0
+Male,1
+
+family_history_with_overweight,Mapped Value
+yes,0
+no,1
+
+FAVC,Mapped Value
+no,0
+yes,1
+
+CAEC,Mapped Value
+Sometimes,0
+Frequently,1
+Always,2
+no,3
+
+SMOKE,Mapped Value
+no,0
+yes,1
+
+SCC,Mapped Value
+no,0
+yes,1
+
+CALC,Mapped Value
+no,0
+Sometimes,1
+Frequently,2
+Always,3
+
+MTRANS,Mapped Value
+Public_Transportation,0
+Walking,1
+Automobile,2
+Motorbike,3
+Bike,4
+
+NObeyesdad,Mapped Value
+Normal_Weight,0
+Overweight_Level_I,1
+Overweight_Level_II,2
+Obesity_Type_I,3
+Insufficient_Weight,4
+Obesity_Type_II,5
+Obesity_Type_III,6
+
