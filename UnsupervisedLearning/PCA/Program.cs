@@ -1,18 +1,13 @@
-﻿using Accord.Statistics.Analysis;
-using CommandLine;
-using MathNet.Numerics.LinearAlgebra;
+﻿using CommandLine;
 using MathNet.Numerics.LinearAlgebra.Double;
-using MathNet.Numerics.Statistics;
 using Microsoft.ML;
 using Microsoft.ML.Data;
-using Microsoft.ML.Transforms;
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Core.Drawing;
 using OxyPlot.Legends;
 using OxyPlot.Series;
 using PCA;
-
 
 await Parser.Default.ParseArguments<Options>(args).WithParsedAsync(async opt =>
 {
@@ -46,19 +41,19 @@ await Parser.Default.ParseArguments<Options>(args).WithParsedAsync(async opt =>
         .Append(context.Transforms.ProjectToPrincipalComponents("Projection", "Features", rank: columns.Count - 1));
 
     var model = pipeline.Fit(data);
-    
+
     var transformedData = model.Transform(data);
-    
+
     var pcaData = context.Data
         .CreateEnumerable<PcaResult>(transformedData, reuseRowObject: false)
         .ToArray();
-    
+
     var groupedData = pcaData
         .GroupBy(p => p.@class)
         .OrderBy(g => g.Key);
 
     var plotModel = new PlotModel { Title = "PCA 2D Projection" };
-    
+
     var markerTypes = new List<MarkerType>
     {
         MarkerType.Circle,
@@ -107,44 +102,39 @@ await Parser.Default.ParseArguments<Options>(args).WithParsedAsync(async opt =>
     plotModel.Axes.Add(new LinearAxis { Position = AxisPosition.Left, Title = "PC2" });
     plotModel.IsLegendVisible = true;
     PngExporter.Export(plotModel, $"{Path.GetFileNameWithoutExtension(opt.InputFile)}-pca-2d.png", 600, 400);
-    
-// Convert your data to a 2D array
-    var array = pcaData.Select(p => p.Projection.Select(x => (double)x).ToArray()).ToArray();
 
-// Create a DenseMatrix from the 2D array
-    var matrix = DenseMatrix.OfRows(array);
 
-// Compute the covariance matrix
-    var covarianceMatrix = Statistics.Covariance(array);
+    var dataMatrix = groupedData
+        .SelectMany(group => group
+            .Select(p => p.Projection.Select(d => (double)d)))
+        .Select(p => p.ToArray())
+        .ToArray();
+    var matrix = DenseMatrix.OfRowArrays(dataMatrix);
 
-// Compute the eigenvalues and eigenvectors
-    var evd = covarianceMatrix.Evd();
+    var centeredMatrix = DenseMatrix.OfRows(matrix.EnumerateRows()
+        .Select(row => row - row.Average()));
 
-// Get the eigenvalues
-    var eigenvalues = evd.EigenValues;
+    var svd = centeredMatrix.Svd(true);
 
-// Get the eigenvectors
-    var eigenvectors = evd.EigenVectors;
+    //var components = svd.VT.Transpose();
 
-// // Create a plot model
-//      plotModel = new PlotModel { Title = "Accumulated Variance" };
-//
-// // Create a line series for the accumulated variance
-//     var lineSeries = new LineSeries();
-//
-// // Add points to the line series
-//     for (int i = 0; i < accumulatedVariance.Length; i++)
-//     {
-//         lineSeries.Points.Add(new DataPoint(i + 1, accumulatedVariance[i]));
-//     }
-//
-// // Add the line series to the plot model
-//     plotModel.Series.Add(lineSeries);
-//
-// // Add axes to the plot model
-//     plotModel.Axes.Add(new LinearAxis { Position = AxisPosition.Bottom, Title = "Principal Component" });
-//     plotModel.Axes.Add(new LinearAxis { Position = AxisPosition.Left, Title = "Accumulated Variance" });
-//
-// // Export the plot to a png file
-//     PngExporter.Export(plotModel, "accumulated-variance.png", 600, 400);
+    var variances = svd.S;
+
+
+    plotModel = new PlotModel { Title = "Accumulated Variance" };
+    plotModel.Background = OxyColors.White;
+
+    var lineSeries = new LineSeries();
+    var accumulatedVariance = 0d;
+    var totalVariance = variances.Sum();
+    for (var i = 0; i < variances.Count; i++)
+    {
+        lineSeries.Points.Add(new DataPoint(i + 1, 100*(accumulatedVariance += variances[i] / totalVariance)));
+    }
+    lineSeries.Color = OxyColors.Red;
+    plotModel.Series.Add(lineSeries);
+    plotModel.Axes.Add(new LinearAxis { Position = AxisPosition.Bottom, Title = "Principal Component", MinorStep = 1, MajorStep = 1});
+    plotModel.Axes.Add(new LinearAxis { Position = AxisPosition.Left, Title = "Accumulated Variance (%)", MinorStep = 10, MajorStep = 10 });
+
+    PngExporter.Export(plotModel, $"{Path.GetFileNameWithoutExtension(opt.InputFile)}-pca-av.png", 600, 400);
 });
