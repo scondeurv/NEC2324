@@ -1,4 +1,8 @@
-﻿using CommandLine;
+﻿using Accord.Statistics.Analysis;
+using CommandLine;
+using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.LinearAlgebra.Double;
+using MathNet.Numerics.Statistics;
 using Microsoft.ML;
 using Microsoft.ML.Data;
 using Microsoft.ML.Transforms;
@@ -103,4 +107,44 @@ await Parser.Default.ParseArguments<Options>(args).WithParsedAsync(async opt =>
     plotModel.Axes.Add(new LinearAxis { Position = AxisPosition.Left, Title = "PC2" });
     plotModel.IsLegendVisible = true;
     PngExporter.Export(plotModel, $"{Path.GetFileNameWithoutExtension(opt.InputFile)}-pca-2d.png", 600, 400);
+    
+// Convert your data to a 2D array
+    var array = pcaData.Select(p => p.Projection.Select(x => (double)x).ToArray()).ToArray();
+
+// Create a DenseMatrix from the 2D array
+    var matrix = DenseMatrix.OfRows(array);
+
+// Compute the covariance matrix
+    var covarianceMatrix = Statistics.Covariance(array);
+
+// Compute the eigenvalues and eigenvectors
+    var evd = covarianceMatrix.Evd();
+
+// Get the eigenvalues
+    var eigenvalues = evd.EigenValues;
+
+// Get the eigenvectors
+    var eigenvectors = evd.EigenVectors;
+
+// // Create a plot model
+//      plotModel = new PlotModel { Title = "Accumulated Variance" };
+//
+// // Create a line series for the accumulated variance
+//     var lineSeries = new LineSeries();
+//
+// // Add points to the line series
+//     for (int i = 0; i < accumulatedVariance.Length; i++)
+//     {
+//         lineSeries.Points.Add(new DataPoint(i + 1, accumulatedVariance[i]));
+//     }
+//
+// // Add the line series to the plot model
+//     plotModel.Series.Add(lineSeries);
+//
+// // Add axes to the plot model
+//     plotModel.Axes.Add(new LinearAxis { Position = AxisPosition.Bottom, Title = "Principal Component" });
+//     plotModel.Axes.Add(new LinearAxis { Position = AxisPosition.Left, Title = "Accumulated Variance" });
+//
+// // Export the plot to a png file
+//     PngExporter.Export(plotModel, "accumulated-variance.png", 600, 400);
 });
