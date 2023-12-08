@@ -2,6 +2,10 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PCA", "PCA\PCA.csproj", "{CF9FF5D5-0490-4222-9D07-40BAD4B7C843}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TSNE", "TSNE\TSNE.csproj", "{2AD5CD77-1F13-460D-818B-27112177EEFB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "..\DotnetTools\Common\Common.csproj", "{A5084388-9B86-4E29-89DA-589673C26828}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +16,13 @@ Global
 		{CF9FF5D5-0490-4222-9D07-40BAD4B7C843}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CF9FF5D5-0490-4222-9D07-40BAD4B7C843}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CF9FF5D5-0490-4222-9D07-40BAD4B7C843}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2AD5CD77-1F13-460D-818B-27112177EEFB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2AD5CD77-1F13-460D-818B-27112177EEFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2AD5CD77-1F13-460D-818B-27112177EEFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2AD5CD77-1F13-460D-818B-27112177EEFB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A5084388-9B86-4E29-89DA-589673C26828}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5084388-9B86-4E29-89DA-589673C26828}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A5084388-9B86-4E29-89DA-589673C26828}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5084388-9B86-4E29-89DA-589673C26828}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
