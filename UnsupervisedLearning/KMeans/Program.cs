@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using CommandLine;
+﻿using CommandLine;
 using KMeans;
 using OxyPlot;
 using OxyPlot.Axes;
@@ -12,8 +11,8 @@ using Options = KMeans.Options;
 await Parser.Default.ParseArguments<Options>(args).WithParsedAsync(async opt =>
 {
     var classifier = new KMeansClassifier();
-    var classes = await classifier.Classify(opt.InputFile, opt.Delimiter, opt.NoHeader, opt.K);
-    var pca = new PrincipalComponentAnalyzer();
+    var predictedClasses = await classifier.Classify(opt.InputFile, opt.Delimiter, opt.NoHeader, opt.K);
+    var pca = new MLPrincipalComponentAnalyzer();
     var (pcaResults, _) = pca.Run(opt.InputFile, opt.Delimiter, opt.NoHeader);
 
     var plotModel = new PlotModel { Title = "k-means" };
@@ -35,33 +34,35 @@ await Parser.Default.ParseArguments<Options>(args).WithParsedAsync(async opt =>
         OxyColors.Purple,
         OxyColors.Orange,
     };
-    
+
     var confusionMatrix = new Dictionary<int, (int Success, int Failed)>();
     IDictionary<int, ScatterSeries> series = new Dictionary<int, ScatterSeries>();
     for (var row = 0; row < pcaResults.Length; row++)
     {
-        var @class = classes[row];
+        var @class = predictedClasses[row] + 1;
         if (!series.ContainsKey(@class))
         {
             series.Add(@class, new ScatterSeries
             {
-                MarkerType = markerTypes[(@class) % markerTypes.Count],
-                MarkerFill = colors[(@class) % colors.Count],
-                Title = $"Class {@class + 1}",
+                MarkerType = markerTypes[(@class - 1) % markerTypes.Count],
+                MarkerFill = colors[(@class - 1) % colors.Count],
+                Title = $"Class {@class}",
             });
-            
+
             confusionMatrix.Add(@class, (0, 0));
         }
-        confusionMatrix[@class] = (pcaResults[row].@class == @class ? confusionMatrix[@class].Success + 1 : confusionMatrix[@class].Success,
-            pcaResults[row].@class != @class ? confusionMatrix[@class].Failed + 1 : confusionMatrix[@class].Failed);
+
+        confusionMatrix[@class] = (
+            ((int)pcaResults[row].@class) == @class ? confusionMatrix[@class].Success + 1 : confusionMatrix[@class].Success,
+            ((int)pcaResults[row].@class) != @class ? confusionMatrix[@class].Failed + 1 : confusionMatrix[@class].Failed);
         series[@class].Points.Add(new ScatterPoint(pcaResults[row].Projection[0], pcaResults[row].Projection[1]));
     }
 
-    for (var i = 0; i < series.Count; i++)
+    for (var i = 1; i <= series.Count; i++)
     {
         plotModel.Series.Add(series[i]);
     }
-    
+
     plotModel.Background = OxyColors.White;
     plotModel.Legends.Add(new Legend
     {
@@ -75,11 +76,11 @@ await Parser.Default.ParseArguments<Options>(args).WithParsedAsync(async opt =>
     plotModel.Axes.Add(new LinearAxis { Position = AxisPosition.Left, Title = "PCA Component 2" });
     plotModel.IsLegendVisible = true;
     PngExporter.Export(plotModel, $"{Path.GetFileNameWithoutExtension(opt.InputFile)}-kmeans-{opt.K}.png", 600, 400);
-    
+
     Console.WriteLine($"Confusion Matrix for k-means with k={opt.K}");
     Console.WriteLine($"Class\tSuccess\tFailed");
     foreach (var (key, value) in confusionMatrix.OrderBy(m => m.Key))
     {
-        Console.WriteLine($"{key + 1}\t{value.Success}\t{value.Failed}");
+        Console.WriteLine($"{key}\t{value.Success}\t{value.Failed}");
     }
 });

@@ -9,7 +9,7 @@ using PCA;
 
 Parser.Default.ParseArguments<Options>(args).WithParsed(opt =>
 {
-    var pca = new PrincipalComponentAnalyzer();
+    var pca = new MLPrincipalComponentAnalyzer();
     var (pcaResults, variances) = pca.Run(opt.InputFile, opt.Delimiter, opt.NoHeader);
 
     var plotModel = new PlotModel { Title = "PCA 2D Projection" };
