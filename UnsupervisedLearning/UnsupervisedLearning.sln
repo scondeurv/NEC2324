@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TSNE", "TSNE\TSNE.csproj", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "..\DotnetTools\Common\Common.csproj", "{A5084388-9B86-4E29-89DA-589673C26828}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KMeans", "KMeans\KMeans.csproj", "{D2614C36-ADFF-44BF-B504-9A18AAE41FAC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{A5084388-9B86-4E29-89DA-589673C26828}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A5084388-9B86-4E29-89DA-589673C26828}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A5084388-9B86-4E29-89DA-589673C26828}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D2614C36-ADFF-44BF-B504-9A18AAE41FAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2614C36-ADFF-44BF-B504-9A18AAE41FAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2614C36-ADFF-44BF-B504-9A18AAE41FAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2614C36-ADFF-44BF-B504-9A18AAE41FAC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
