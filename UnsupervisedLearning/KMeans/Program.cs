@@ -12,8 +12,8 @@ await Parser.Default.ParseArguments<Options>(args).WithParsedAsync(async opt =>
 {
     var classifier = new KMeansClassifier();
     var predictedClasses = await classifier.Classify(opt.InputFile, opt.Delimiter, opt.NoHeader, opt.K);
-    var pca = new MLPrincipalComponentAnalyzer();
-    var (pcaResults, _) = pca.Run(opt.InputFile, opt.Delimiter, opt.NoHeader);
+    var pca = new PrincipalComponentAnalyzer();
+    var (pcaResults, _) = await pca.Run(opt.InputFile, opt.Delimiter, opt.NoHeader);
 
     var plotModel = new PlotModel { Title = "k-means" };
 
@@ -39,13 +39,13 @@ await Parser.Default.ParseArguments<Options>(args).WithParsedAsync(async opt =>
     IDictionary<int, ScatterSeries> series = new Dictionary<int, ScatterSeries>();
     for (var row = 0; row < pcaResults.Length; row++)
     {
-        var @class = predictedClasses[row] + 1;
+        var @class = predictedClasses[row];
         if (!series.ContainsKey(@class))
         {
             series.Add(@class, new ScatterSeries
             {
-                MarkerType = markerTypes[(@class - 1) % markerTypes.Count],
-                MarkerFill = colors[(@class - 1) % colors.Count],
+                MarkerType = markerTypes[@class % markerTypes.Count],
+                MarkerFill = colors[@class % colors.Count],
                 Title = $"Class {@class}",
             });
 

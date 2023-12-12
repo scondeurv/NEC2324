@@ -6,9 +6,9 @@ using Tools.Common;
 
 namespace PCA;
 
-public sealed class PrincipalComponentAnalyzer : IPrincipalComponentAnalyzer
+public sealed class PrincipalComponentAnalyzer
 {
-    public async Task<(PcaResult[] Results, Vector<double> Variances)> Run(string inputFile, string delimiter, bool noHeader, CancellationToken cancellationToken = default)
+    public async Task<(PcaResult[] Results, double[] Variances)> Run(string inputFile, string delimiter, bool noHeader, CancellationToken cancellationToken = default)
     {
         var dataset = new Dataset();
         await dataset.Load(inputFile, delimiter, noHeader);
@@ -36,7 +36,7 @@ public sealed class PrincipalComponentAnalyzer : IPrincipalComponentAnalyzer
             };
         }
         
-        var variances = DenseVector.OfEnumerable() 
-            ;
+        var variances = Vector<double>.Build.Dense(pca.ComponentProportions);
+        return (results, variances.ToArray());
     }
 }

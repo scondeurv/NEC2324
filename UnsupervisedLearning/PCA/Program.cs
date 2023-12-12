@@ -7,10 +7,10 @@ using OxyPlot.Legends;
 using OxyPlot.Series;
 using PCA;
 
-Parser.Default.ParseArguments<Options>(args).WithParsed(opt =>
+await Parser.Default.ParseArguments<Options>(args).WithParsedAsync(async opt =>
 {
-    var pca = new MLPrincipalComponentAnalyzer();
-    var (pcaResults, variances) = pca.Run(opt.InputFile, opt.Delimiter, opt.NoHeader);
+    var pca = new PrincipalComponentAnalyzer();
+    var (pcaResults, variances) = await pca.Run(opt.InputFile, opt.Delimiter, opt.NoHeader);
 
     var plotModel = new PlotModel { Title = "PCA 2D Projection" };
 
@@ -32,8 +32,9 @@ Parser.Default.ParseArguments<Options>(args).WithParsed(opt =>
         OxyColors.Orange,
     };
 
-    var groupedResults = pcaResults.GroupBy(r => r.@class).ToDictionary(g => g.Key, g => g.ToList());
+    var groupedResults = pcaResults.GroupBy(r => (int)r.@class).ToDictionary(g => g.Key, g => g.ToList());
     var index = 0;
+    var series = new Dictionary<int, ScatterSeries>();
     foreach (var group in groupedResults)
     {
         var scatterSeries = new ScatterSeries
@@ -46,10 +47,14 @@ Parser.Default.ParseArguments<Options>(args).WithParsed(opt =>
         var points = group.Value.Select(p => new ScatterPoint(p.Projection[0], p.Projection[1])).ToList();
         scatterSeries.Points.AddRange(points);
 
-        plotModel.Series.Add(scatterSeries);
+        series.Add(group.Key, scatterSeries);
         index++;
     }
 
+    for (var i = 1; i <= series.Count; i++)
+    {
+        plotModel.Series.Add(series[i]);
+    }
     plotModel.Background = OxyColors.White;
     plotModel.Legends.Add(new Legend
     {
@@ -70,7 +75,7 @@ Parser.Default.ParseArguments<Options>(args).WithParsed(opt =>
     var lineSeries = new LineSeries();
     var accumulatedVariance = 0d;
     var totalVariance = variances.Sum();
-    for (var i = 0; i < variances.Count; i++)
+    for (var i = 0; i < variances.Length; i++)
     {
         lineSeries.Points.Add(new DataPoint(i + 1, 100 * (accumulatedVariance += variances[i] / totalVariance)));
     }
