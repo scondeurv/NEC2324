@@ -11,9 +11,9 @@ using Options = KMeans.Options;
 await Parser.Default.ParseArguments<Options>(args).WithParsedAsync(async opt =>
 {
     var classifier = new KMeansClassifier();
-    var predictedClasses = await classifier.Classify(opt.InputFile, opt.Delimiter, opt.NoHeader, opt.K);
+    var predictedClasses = await classifier.Classify(opt.InputFile, opt.Separator, opt.NoHeader, opt.K, opt.Tolerance, opt.DistanceMethod);
     var pca = new PrincipalComponentAnalyzer();
-    var (pcaResults, _) = await pca.Run(opt.InputFile, opt.Delimiter, opt.NoHeader);
+    var (pcaResults, _) = await pca.Run(opt.InputFile, opt.Separator, opt.NoHeader);
 
     var plotModel = new PlotModel { Title = "k-means" };
 
