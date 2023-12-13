@@ -202,6 +202,23 @@ public class Dataset
         return (x, y);
     }
 
+    public double[,] ToMultiDimensional(bool scaled = false)
+    {
+        var data = scaled ? ScaledData : Data;
+        var rows = data.First().Value.Length;
+        var cols = data.Count;
+        var matrix = new double[rows, cols];
+        for (var row = 0; row < data.First().Value.Length; row++)
+        {
+            var col = 0;
+            foreach (var feature in data.Keys)
+            { 
+                matrix[row, col++] = data[feature][row];
+            }
+        }
+
+        return matrix;
+    }
     public double[][] ToJagged(bool scaled = false)
     {
         var src = scaled ? ScaledData : Data;
