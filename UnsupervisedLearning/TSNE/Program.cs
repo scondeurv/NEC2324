@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using CommandLine;
 using OxyPlot;
+using OxyPlot.Annotations;
 using OxyPlot.Axes;
 using OxyPlot.Core.Drawing;
 using OxyPlot.Legends;
@@ -83,8 +84,25 @@ await Parser.Default.ParseArguments<Options>(args).WithParsedAsync(async opt =>
         LegendBorder = OxyColors.Black,
         LegendBorderThickness = 2,
     });
-    plotModel.Axes.Add(new LinearAxis { Position = AxisPosition.Bottom, Title = "Embedding 1" });
-    plotModel.Axes.Add(new LinearAxis { Position = AxisPosition.Left, Title = "Embedding 2" });
+
+    var minX = series.Values.Min(s => s.Points.Min(p => p.X));
+    var maxX = series.Values.Max(s => s.Points.Max(p => p.X));
+    var minY = series.Values.Min(s => s.Points.Min(p => p.Y));
+    var maxY = series.Values.Max(s => s.Points.Max(p => p.Y));
+    var marginX = (maxX - minX) * 0.1;
+    var marginY = (maxY - minY) * 0.1;
+    
+    plotModel.Axes.Add(new LinearAxis { Position = AxisPosition.Bottom, Title = "Embedding 1", Minimum = minX - marginX, Maximum = maxX + marginX });
+    plotModel.Axes.Add(new LinearAxis { Position = AxisPosition.Left, Title = "Embedding 2", Minimum = minY - marginY, Maximum = maxY + marginY });
+    
+    plotModel.Annotations.Add(new TextAnnotation
+    {
+        Text = $"Perplexity: {opt.Perplexity}, Theta: {opt.Theta}",
+        TextPosition = new DataPoint(maxX + marginX, maxY + marginY),
+        TextHorizontalAlignment = HorizontalAlignment.Right,
+        TextVerticalAlignment = VerticalAlignment.Top,
+    });
     plotModel.IsLegendVisible = true;
-    PngExporter.Export(plotModel, $"{Path.GetFileNameWithoutExtension(opt.InputFile)}-tnse.png", 600, 400);    
+    var rand = new Random();
+    PngExporter.Export(plotModel, $"{Path.GetFileNameWithoutExtension(opt.InputFile)}-tnse-{rand.Next()}.png", 600, 400);    
 });

@@ -23,10 +23,10 @@ public sealed class KMeansClassifier
         kMeans.Distance = GetDistanceMethod(distanceMethod);
 
         var clusters = kMeans.Learn(input);
-        var classes = clusters.Decide(input);
+        var predictedClasses = clusters.Decide(input);
 
-        classes = classes.Select(c => c + 1).ToArray();
-        return classes;
+        predictedClasses = predictedClasses.Select(c => c + 1).ToArray();
+        return predictedClasses;
     }
 
     private static IDistance<double[], double[]> GetDistanceMethod(string distanceMethod)

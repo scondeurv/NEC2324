@@ -51,10 +51,12 @@ await Parser.Default.ParseArguments<Options>(args).WithParsedAsync(async opt =>
         index++;
     }
 
-    for (var i = 1; i <= series.Count; i++)
+
+    foreach (var @class in series.Keys.OrderBy(k => k))
     {
-        plotModel.Series.Add(series[i]);
+        plotModel.Series.Add(series[@class]);
     }
+    
     plotModel.Background = OxyColors.White;
     plotModel.Legends.Add(new Legend
     {

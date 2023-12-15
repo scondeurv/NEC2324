@@ -10,7 +10,7 @@ public sealed class Options
     [Option(shortName: 's', longName: "separator", Required = false, Default = "\t", HelpText = "Separator")]
     public required string Separator { get; init; }
     
-    [Option(shortName: 'h', longName: "no-header", Required = false, Default = false, HelpText = "Output file")]
+    [Option(shortName: 'h', longName: "no-header", Required = false, Default = false, HelpText = "No Header")]
     public required bool NoHeader { get; init; }
     
     [Option(shortName: 'k', longName: "kvalue", Required = false, Default = 2, HelpText = "KMeans K")]

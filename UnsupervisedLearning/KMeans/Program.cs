@@ -14,7 +14,7 @@ await Parser.Default.ParseArguments<Options>(args).WithParsedAsync(async opt =>
     var predictedClasses = await classifier.Classify(opt.InputFile, opt.Separator, opt.NoHeader, opt.K, opt.Tolerance, opt.DistanceMethod);
     var pca = new PrincipalComponentAnalyzer();
     var (pcaResults, _) = await pca.Run(opt.InputFile, opt.Separator, opt.NoHeader);
-
+    
     var plotModel = new PlotModel { Title = "k-means" };
 
     var markerTypes = new List<MarkerType>
@@ -44,8 +44,8 @@ await Parser.Default.ParseArguments<Options>(args).WithParsedAsync(async opt =>
         {
             series.Add(@class, new ScatterSeries
             {
-                MarkerType = markerTypes[@class % markerTypes.Count],
-                MarkerFill = colors[@class % colors.Count],
+                MarkerType = markerTypes[(@class - 1) % markerTypes.Count],
+                MarkerFill = colors[(@class - 1) % colors.Count],
                 Title = $"Class {@class}",
             });
 
@@ -76,7 +76,7 @@ await Parser.Default.ParseArguments<Options>(args).WithParsedAsync(async opt =>
     plotModel.Axes.Add(new LinearAxis { Position = AxisPosition.Left, Title = "PCA Component 2" });
     plotModel.IsLegendVisible = true;
     PngExporter.Export(plotModel, $"{Path.GetFileNameWithoutExtension(opt.InputFile)}-kmeans-{opt.K}.png", 600, 400);
-
+    
     Console.WriteLine($"Confusion Matrix for k-means with k={opt.K}");
     Console.WriteLine($"Class\tSuccess\tFailed");
     foreach (var (key, value) in confusionMatrix.OrderBy(m => m.Key))

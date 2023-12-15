@@ -24,6 +24,6 @@ await Parser.Default.ParseArguments<Options>(args).WithParsedAsync(async opt =>
 
     var clustering = algorithm.GetClustering(dataPoints);
 
-    var fileName = $"{Path.GetFileNameWithoutExtension(opt.InputFile)}-clustering.json";
+    var fileName = $"{Path.GetFileNameWithoutExtension(opt.InputFile)}-clustering-{opt.Linkage}.json";
     clustering.SaveD3DendrogramFile(fileName, formatting: Formatting.Indented);
 });

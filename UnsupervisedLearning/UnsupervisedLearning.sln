@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KMeans", "KMeans\KMeans.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AHC", "AHC\AHC.csproj", "{4411AF7B-F24D-4B14-8174-CD2131CD5D06}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SOM", "SOM\SOM.csproj", "{E315166B-E2E0-4912-8F26-4786C98147F9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +38,9 @@ Global
 		{4411AF7B-F24D-4B14-8174-CD2131CD5D06}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4411AF7B-F24D-4B14-8174-CD2131CD5D06}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4411AF7B-F24D-4B14-8174-CD2131CD5D06}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E315166B-E2E0-4912-8F26-4786C98147F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E315166B-E2E0-4912-8F26-4786C98147F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E315166B-E2E0-4912-8F26-4786C98147F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E315166B-E2E0-4912-8F26-4786C98147F9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
