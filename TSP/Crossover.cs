@@ -6,6 +6,7 @@ namespace TSP;
 public static class Crossover
 {
     private static Random Random { get; } = new();
+    
     public static Chromosome DoCrossover(string method, Chromosome one, Chromosome another, IProblem problem)
     {
         switch (method.ToLower())
@@ -21,8 +22,14 @@ public static class Crossover
     
     public static Chromosome OX(Chromosome one, Chromosome another, IProblem problem)
     {
-        var point1 = Random.Next(one.Genes.Length - 1);
-        var point2 = Random.Next(one.Genes.Length - 1);
+        int point1;
+        int point2;
+        lock (Random)
+        {
+            point1 = Random.Next(one.Genes.Length - 1);
+            point2 = Random.Next(one.Genes.Length - 1);    
+        } 
+        
         var start = Math.Min(point1, point2);
         var end = Math.Max(point1, point2);
 
@@ -47,8 +54,13 @@ public static class Crossover
 
     public static Chromosome PMX(Chromosome one, Chromosome another, IProblem problem)
     {
-        var point1 = Random.Next(one.Genes.Length - 1);
-        var point2 = Random.Next(one.Genes.Length - 1);
+        int point1;
+        int point2;
+        lock (Random)
+        {
+            point1 = Random.Next(one.Genes.Length - 1);
+            point2 = Random.Next(one.Genes.Length - 1);    
+        } 
         var start = Math.Min(point1, point2);
         var end = Math.Max(point1, point2);
 

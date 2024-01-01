@@ -22,7 +22,12 @@ public static class Mutator
     
     public static Chromosome RotationToRightMutation(Chromosome c, IProblem problem)
     {
-        var shiftAmount = Random.Next(c.Genes.Length);
+        int shiftAmount;
+        lock (Random)
+        {
+            shiftAmount = Random.Next(c.Genes.Length);
+        } 
+
         var newGenes = new int[c.Genes.Length];
 
         for (var i = 0; i < c.Genes.Length; i++)
@@ -35,8 +40,14 @@ public static class Mutator
     
     public static Chromosome InversionMutation(Chromosome c, IProblem problem)
     {
-        var point1 = Random.Next(c.Genes.Length);
-        var point2 = Random.Next(c.Genes.Length);
+        int point1;
+        int point2;
+        lock (Random)
+        {
+            point1 = Random.Next(c.Genes.Length);
+            point2 = Random.Next(c.Genes.Length);
+        }
+
         var start = Math.Min(point1, point2);
         var end = Math.Max(point1, point2);
         var newGenes = c.Genes.ToArray();

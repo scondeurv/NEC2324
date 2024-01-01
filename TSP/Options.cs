@@ -10,7 +10,7 @@ public sealed class Options
     [Option(shortName: 'l', longName: "list", HelpText = "List available problems", Group = "Exec mode")]
     public required bool ListProblems { get; init; }
 
-    [Option(shortName: 'i', longName: "max-iterations", Required = false, Default = 100,
+    [Option(shortName: 'i', longName: "max-iterations", Required = false, Default = 10,
         HelpText = "Max iterations. Iterations get divided by max threads")]
     public required int MaxIterations { get; init; }
 
@@ -18,14 +18,14 @@ public sealed class Options
         HelpText = "Max parallel threads. Iterations get divided by this number")]
     public required int MaxThreads { get; init; }
 
-    [Option(shortName: 'g', longName: "generations", Required = false, Default = 100, HelpText = "Max generations")]
+    [Option(shortName: 'g', longName: "generations", Required = false, Default = 25, HelpText = "Max generations")]
     public required int MaxGenerations { get; init; }
 
     [Option(shortName: 'j', longName: "population-adjust", Required = false, Default = 1.5,
         HelpText = "Population adjust factor. It is multiplied by the genes amount to get the population size")]
     public required double PopulationAdjustFactor { get; init; }
 
-    [Option(shortName: 'm', longName: "population-adjust-multiplier", Required = false, Default = 1.1,
+    [Option(shortName: 'm', longName: "population-adjust-multiplier", Required = false, Default = 1.5,
         HelpText =
             "Population adjust factor multiplier. It is multiplied by populations adjust factor every iteration")]
     public required double PopulationAdjustMultiplier { get; init; }
@@ -49,4 +49,9 @@ public sealed class Options
         HelpText =
             "Elitism. Percentage of best chromosomes to keep from one generation to the next")]
     public required double ElitesPercentage { get; init; }
+    
+    [Option(shortName: 'h', longName: "stall-threshold", Required = false, Default = 0.25,
+        HelpText =
+            "Stall threshold. Percentage of generations without improvement to consider the algorithm stalled")]
+    public required double StallThreshold { get; init; }
 }

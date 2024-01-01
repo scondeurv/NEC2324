@@ -10,11 +10,16 @@ public static class ChromosomeFactory
     
     public static Chromosome Create(IProblem problem)
     {
-        var genes = problem.NodeProvider
-            .GetNodes()
-            .OrderBy(x => Random.Next())
-            .Select(x => x.Id)
-            .ToImmutableArray();
+        ImmutableArray<int> genes;
+        lock (Random)
+        {
+            genes = problem.NodeProvider
+                .GetNodes()
+                .OrderBy(x => Random.Next())
+                .Select(x => x.Id)
+                .ToImmutableArray();
+
+        }
 
         var fitness = 1 / problem.TourDistance(new Tour("tour", string.Empty, genes.Length, genes));
         return new Chromosome(genes, fitness);

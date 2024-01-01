@@ -41,7 +41,7 @@ Parser.Default.ParseArguments<Options>(args).WithParsedAsync(async opts =>
                 var population = InitPopulation(populationAdjustFactor, problem);
                 var task = taskFactory.StartNew(
                     () => Run(population, generations, problem, opts.SelectionMethod, opts.CrossoverMethod,
-                        opts.MutationMethod, id: j, elitesPercentage: opts.ElitesPercentage),
+                        opts.MutationMethod, id: j, elitesPercentage: opts.ElitesPercentage, stallThreshold: opts.StallThreshold),
                     TaskCreationOptions.LongRunning | TaskCreationOptions.AttachedToParent);
                 tasks.Add(task);
                 populationAdjustFactor *= opts.PopulationAdjustMultiplier;
@@ -65,6 +65,9 @@ Parser.Default.ParseArguments<Options>(args).WithParsedAsync(async opts =>
 
         var bestConfiguration = configurations.OrderByDescending(c => c.Fitness).First();
         
+        Console.WriteLine("---------------------");
+        Console.WriteLine("BEST SOLUTION FOUND:");
+        Console.WriteLine("---------------------");
         Console.WriteLine(bestConfiguration);
         Console.WriteLine(bestChromosome);
         Console.WriteLine($"Distance: {1 / bestChromosome.Fitness}");
@@ -91,12 +94,15 @@ static Chromosome Run(
     string crossoverMethod,
     string mutationMethod,
     double elitesPercentage = 0.0,
+    double stallThreshold = 0.25,
     IReadOnlyDictionary<string, object> methodParams = null,
     int id = 0)
 {
     Console.WriteLine(
         $"[T-{id}] Evolving a population of {sourcePopulation.Length} along {generations} generations...");
     var population = sourcePopulation.ToArray();
+    double previousBestFitness = 0;
+    var stallCounter = 0;
     for (var generation = 0; generation < generations; generation++)
     {
         var populationPrime = new List<Chromosome>();
@@ -116,12 +122,27 @@ static Chromosome Run(
         }
 
         population = populationPrime.ToArray();
+        var best = population.OrderByDescending(c => c.Fitness).First();
+        
+        if (best.Fitness <= previousBestFitness)
+        {
+            stallCounter++;
+            if (stallCounter >= generations * (1 + stallThreshold))
+            {
+                Console.WriteLine($"[T-{id}] GA is stalled.");
+                break;
+            }
+        }
+        else
+        {
+            stallCounter = 0;
+            previousBestFitness = best.Fitness;
+        }
     }
 
-    var best = population.OrderBy(c => c.Fitness).First();
-    Console.WriteLine($"[T-{id}] Best fitness: {best.Fitness}");
-
-    return best;
+    var winner = population.OrderByDescending(c => c.Fitness).First();
+    Console.WriteLine($"[T-{id}] Winner: {winner}");
+    return winner;
 }
 
 static ImmutableArray<Chromosome> InitPopulation(double geneMultiplier, IProblem problem)

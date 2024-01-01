@@ -12,7 +12,7 @@ public static class Selector
             case "rank":
                 return RankSelection(population);
             case "tournament":
-                return TournamentSelection(population, methodParams is not null ? (int) methodParams["TournamentSize"] : 3);
+                return TournamentSelection(population, methodParams is not null ? (int) methodParams["TournamentSize"] : population.Count() / 2);
             default:
                 throw new NotSupportedException(method);
         }
