@@ -18,7 +18,6 @@ public static class ChromosomeFactory
                 .OrderBy(x => Random.Next())
                 .Select(x => x.Id)
                 .ToImmutableArray();
-
         }
 
         var fitness = 1 / problem.TourDistance(new Tour("tour", string.Empty, genes.Length, genes));

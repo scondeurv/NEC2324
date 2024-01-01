@@ -9,6 +9,7 @@
 
     <ItemGroup>
       <PackageReference Include="CommandLineParser" Version="2.9.1" />
+      <PackageReference Include="ScottPlot" Version="4.1.70" />
       <PackageReference Include="TSPLib.Net" Version="1.1.6" />
     </ItemGroup>
 
@@ -49,13 +50,10 @@
       <None Update="TSPLIB95\TSP\att48.tsp">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
-      <None Update="TSPLIB95\TSP\dantzig42.tsp">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
       <None Update="TSPLIB95\TSP\fri26.tsp">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
-      <None Update="TSPLIB95\TSP\p01.tsp">
+      <None Update="TSPLIB95\TSP\burma14.tsp">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
     </ItemGroup>

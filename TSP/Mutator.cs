@@ -12,7 +12,7 @@ public static class Mutator
         switch (method.ToLower())
         {
             case "right-shift":
-                return RotationToRightMutation(c, problem);
+                return RightShiftMutation(c, problem);
             case "inversion":
                 return InversionMutation(c, problem);
             default:
@@ -20,7 +20,7 @@ public static class Mutator
         }
     }
     
-    public static Chromosome RotationToRightMutation(Chromosome c, IProblem problem)
+    public static Chromosome RightShiftMutation(Chromosome c, IProblem problem)
     {
         int shiftAmount;
         lock (Random)

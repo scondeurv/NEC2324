@@ -1,9 +1,17 @@
 ﻿using System.Collections.Immutable;
+using System.Drawing;
 using CommandLine;
+using ScottPlot;
 using TSP;
 using TspLibNet;
 
-Parser.Default.ParseArguments<Options>(args).WithParsedAsync(async opts =>
+Chromosome? bestChromosome = default;
+var configurations = new List<Configuration>();
+var evolution = new List<(int X, int Y)>();
+IProblem? problem = default;
+Console.CancelKeyPress += new ConsoleCancelEventHandler(CancelHandler);
+
+Parser.Default.ParseArguments<Options>(args).WithParsed( opts =>
 {
     #region List problems
 
@@ -20,18 +28,18 @@ Parser.Default.ParseArguments<Options>(args).WithParsedAsync(async opts =>
 
     #endregion
 
-
     #region Run TSP problem
 
     if (opts.Problem != null)
     {
-        var problem = LoadProblem(opts.Problem);
+        problem = LoadProblem(opts.Problem);
         var populationAdjustFactor = opts.PopulationAdjustFactor;
         var generations = opts.MaxGenerations;
-        var configurations = new List<Configuration>();
-        Chromosome bestChromosome = default;
+
         var taskFactory = new TaskFactory<Chromosome>();
         Console.WriteLine("Fitting population size...");
+        double previousBestFitness = 0;
+        int stallCounter = 1;
         for (var i = 0; i < opts.MaxIterations / opts.MaxThreads; i++)
         {
             Console.WriteLine($"Iteration {i}");
@@ -47,34 +55,59 @@ Parser.Default.ParseArguments<Options>(args).WithParsedAsync(async opts =>
                 populationAdjustFactor *= opts.PopulationAdjustMultiplier;
             }
 
-            Task.WaitAll(tasks.ToArray());
+            Task<Chromosome>.WaitAll(tasks.ToArray());
             var best = tasks.Select(t => t.GetAwaiter().GetResult())
                 .Select((c, index) => (c, index))
                 .MaxBy(t => t.c.Fitness);
-
+            
             var populationSizeMultiplier = populationAdjustFactor / Math.Pow(opts.PopulationAdjustMultiplier, (opts.MaxThreads - best.index));
 
             if (bestChromosome is null || best.c.Fitness > bestChromosome.Fitness)
             {
                 bestChromosome = best.c;
             }
+            
+            if (bestChromosome.Fitness <= previousBestFitness)
+            {
+                stallCounter++;
+                if (stallCounter >= generations * (1 + opts.StallThreshold))
+                {
+                    Console.WriteLine($"Algorithm is stalled.");
+                    break;
+                }
+            }
+            else
+            {
+                stallCounter = 0;
+                previousBestFitness = bestChromosome.Fitness;
+            }
 
+            evolution.Add((i, (int)(1 / bestChromosome.Fitness)));
+            
             Console.WriteLine($"Fitting population size. Current best fitness: {bestChromosome.Fitness}");
-            configurations.Add(new Configuration(populationSizeMultiplier, generations, best.c.Fitness));
+            configurations.Add(new Configuration(populationSizeMultiplier, (int)(problem.NodeProvider.GetNodes().Count * populationSizeMultiplier),  generations, best.c.Fitness));
         }
-
-        var bestConfiguration = configurations.OrderByDescending(c => c.Fitness).First();
         
-        Console.WriteLine("---------------------");
-        Console.WriteLine("BEST SOLUTION FOUND:");
-        Console.WriteLine("---------------------");
-        Console.WriteLine(bestConfiguration);
-        Console.WriteLine(bestChromosome);
-        Console.WriteLine($"Distance: {1 / bestChromosome.Fitness}");
+        DrawResults();
     }
 
     #endregion
 });
+
+void DrawResults()
+{
+    var bestConfiguration = configurations.OrderByDescending(c => c.Fitness).FirstOrDefault();
+    Console.WriteLine("---------------------");
+    Console.WriteLine("BEST SOLUTION FOUND:");
+    Console.WriteLine("---------------------");
+    Console.WriteLine(bestConfiguration);
+    Console.WriteLine(bestChromosome);
+    Console.WriteLine($"Distance: {(int)(1 / bestChromosome?.Fitness ?? 0)}");
+    if(bestChromosome != null) {
+        PlotEvolution(evolution.ToArray(), problem.Name);
+        Console.WriteLine($"Generated evolution plot: {problem.Name}.png");
+    }
+}
 
 static IProblem LoadProblem(string problemName)
 {
@@ -95,7 +128,7 @@ static Chromosome Run(
     string mutationMethod,
     double elitesPercentage = 0.0,
     double stallThreshold = 0.25,
-    IReadOnlyDictionary<string, object> methodParams = null,
+    IReadOnlyDictionary<string, object>? methodParams = null,
     int id = 0)
 {
     Console.WriteLine(
@@ -139,7 +172,7 @@ static Chromosome Run(
             previousBestFitness = best.Fitness;
         }
     }
-
+    
     var winner = population.OrderByDescending(c => c.Fitness).First();
     Console.WriteLine($"[T-{id}] Winner: {winner}");
     return winner;
@@ -164,4 +197,29 @@ static IEnumerable<Chromosome> ApplyElitism(IEnumerable<Chromosome> population, 
     var sortedPopulation = population.OrderByDescending(c => c.Fitness).ToList();
     var elites = sortedPopulation.Take(elitesCount).ToList();
     return elites;
+}
+
+static void PlotEvolution((int X, int Y)[] evolution, string problemName)
+{
+    var plt = new Plot(600, 400);
+
+    for(var i = 0; i < evolution.Length - 1; i++)
+    {
+        var (x1, y1) = evolution[i];
+        var (x2, y2) = evolution[i + 1];
+        plt.AddLine(x1, y1, x2, y2, Color.Red, 1.5f);
+    }
+    
+    plt.Title($"TSP Evolution {problemName}");
+    plt.XLabel("Iteration");
+    plt.YLabel("Distance");
+    
+    plt.SaveFig($"{problemName}.png");
+}
+
+void CancelHandler(object sender, ConsoleCancelEventArgs e)
+{
+    Console.WriteLine("Interrupting....");
+    DrawResults();
+    Environment.Exit(0);
 }

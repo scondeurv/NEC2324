@@ -14,7 +14,7 @@ public sealed class Options
         HelpText = "Max iterations. Iterations get divided by max threads")]
     public required int MaxIterations { get; init; }
 
-    [Option(shortName: 't', longName: "threads", Required = false, Default = 5,
+    [Option(shortName: 't', longName: "threads", Required = false, Default = 1,
         HelpText = "Max parallel threads. Iterations get divided by this number")]
     public required int MaxThreads { get; init; }
 
@@ -25,7 +25,7 @@ public sealed class Options
         HelpText = "Population adjust factor. It is multiplied by the genes amount to get the population size")]
     public required double PopulationAdjustFactor { get; init; }
 
-    [Option(shortName: 'm', longName: "population-adjust-multiplier", Required = false, Default = 1.5,
+    [Option(shortName: 'm', longName: "population-adjust-multiplier", Required = false, Default = 1.25,
         HelpText =
             "Population adjust factor multiplier. It is multiplied by populations adjust factor every iteration")]
     public required double PopulationAdjustMultiplier { get; init; }
@@ -50,7 +50,7 @@ public sealed class Options
             "Elitism. Percentage of best chromosomes to keep from one generation to the next")]
     public required double ElitesPercentage { get; init; }
     
-    [Option(shortName: 'h', longName: "stall-threshold", Required = false, Default = 0.25,
+    [Option(shortName: 'h', longName: "stall-threshold", Required = false, Default = 0.1,
         HelpText =
             "Stall threshold. Percentage of generations without improvement to consider the algorithm stalled")]
     public required double StallThreshold { get; init; }
