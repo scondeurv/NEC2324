@@ -4,6 +4,7 @@ using CommandLine;
 using ScottPlot;
 using TSP;
 using TspLibNet;
+using TspLibNet.Tours;
 
 Chromosome? bestChromosome = default;
 var configurations = new List<Configuration>();
@@ -28,9 +29,24 @@ Parser.Default.ParseArguments<Options>(args).WithParsed( opts =>
 
     #endregion
 
+    #region get distance
+
+    if (!string.IsNullOrWhiteSpace(opts.Distance))
+    {
+        var tspLib = new TspLib95(Path.GetFullPath($".{Path.DirectorySeparatorChar}TSPLIB95"));
+        tspLib.LoadTSP(opts.Problem);
+        var tsp = tspLib.TSPItems().First();
+        var nodes = File.ReadAllText(opts.Distance).Split(',').Select(int.Parse).ToArray();
+        var tour = new Tour("tour", string.Empty, nodes.Length, nodes);
+        Console.WriteLine($"Tour distance: {tsp.Problem.TourDistance(tour)}");
+        return;
+    }
+
+    #endregion
+
     #region Run TSP problem
 
-    if (opts.Problem != null)
+    if (!string.IsNullOrWhiteSpace(opts.Problem))
     {
         problem = LoadProblem(opts.Problem);
         var populationAdjustFactor = opts.PopulationAdjustFactor;
@@ -106,6 +122,7 @@ void DrawResults()
     if(bestChromosome != null) {
         PlotEvolution(evolution.ToArray(), problem.Name);
         Console.WriteLine($"Generated evolution plot: {problem.Name}.png");
+        bestChromosome.SaveTour($"{problem.Name}-tour.txt");
     }
 }
 

@@ -18,4 +18,7 @@ public class Chromosome
     public override string ToString() => @$"
 Fitness: {Fitness}
 Path: {string.Join(" -> ", Genes.Select(n => n))} -> {Genes.First()}";
+
+    public void SaveTour(string fileName) =>
+        File.WriteAllText(fileName, string.Join(',' , Genes.Select(n => n.ToString())));
 }

@@ -56,6 +56,12 @@
       <None Update="TSPLIB95\TSP\burma14.tsp">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
+      <None Update="TSPLIB95\TSP\ulysses22.tsp">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="TSPLIB95\TSP\eil76.tsp">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>

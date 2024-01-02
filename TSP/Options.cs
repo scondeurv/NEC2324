@@ -54,4 +54,9 @@ public sealed class Options
         HelpText =
             "Stall threshold. Percentage of generations without improvement to consider the algorithm stalled")]
     public required double StallThreshold { get; init; }
+
+    [Option(shortName: 'd', longName: "distance", Required = false, Default = "", Group = "Exec mode",
+        HelpText =
+            "Get distance of a tour defined in a file with the nodes separated by commas")]
+    public string Distance { get; init; }
 }
